@@ -22,13 +22,43 @@
   const savedSet = new Set(store.get('saved', []));
   const lastChapter = store.get('last', {});
 
-  /* ---------- Fit the 390 x 844 frame to the window ---------- */
+  /* ---------- Fit the layout to the screen ----------
+     Desktop: a 390 x 844 phone frame, scaled down if the window is small.
+     Phone: fill the screen edge to edge. The layout is 390 wide and as tall as the screen,
+     using the space under the status bar and home indicator when there is no system UI there. */
   let scale = 1;
+  let PAGE_H = 844;
+  let onFit = null;
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
+  document.body.appendChild(probe);
   function fit() {
     const w = window.innerWidth, h = window.innerHeight;
-    scale = Math.min(1, w / 390, h / 844);
+    const st = getComputedStyle(probe);
+    const satPx = parseFloat(st.paddingTop) || 0, sabPx = parseFloat(st.paddingBottom) || 0;
+    const mobile = w < 600;
+    let W = 390, H = 844, to = 0, bo = 0, sh = 0;
+    if (mobile) {
+      for (let k = 0; k < 2; k++) {
+        to = Math.max(-36, satPx / scale - 44);
+        bo = Math.max(-14, sabPx / scale - 34);
+        scale = Math.min(w / 390, h / (764 + to + bo));
+      }
+      W = w / scale; H = h / scale;
+      sh = Math.max(0, 844 - (H - to - bo));
+    } else {
+      scale = Math.min(1, w / 390, h / 844);
+    }
+    PAGE_H = H;
+    phone.style.width = W + 'px';
+    phone.style.height = H + 'px';
+    phone.style.setProperty('--ph', H + 'px');
+    phone.style.setProperty('--to', to.toFixed(1) + 'px');
+    phone.style.setProperty('--bo', bo.toFixed(1) + 'px');
+    phone.style.setProperty('--sh', sh.toFixed(1) + 'px');
     phone.style.transform = 'scale(' + scale + ')';
-    phone.classList.toggle('edge', w < 500);
+    phone.classList.toggle('edge', mobile);
+    if (onFit) onFit();
   }
   window.addEventListener('resize', fit);
   fit();
@@ -298,8 +328,13 @@
   const track = $('#r-track');
   const rStage = $('#r-stage');
   const sheet = $('#sheet');
+  onFit = () => {
+    const n = track.children.length;
+    if (!n) return;
+    track.style.height = n * PAGE_H + 'px';
+    track.style.transform = 'translateY(' + (-R.idx * PAGE_H) + 'px)';
+  };
   const R = { open: false, ch: null, idx: 0, sel: null, study: false, playing: false, wheelLock: false };
-  const PAGE_H = 844;
   const chapterCache = new Map();
 
   async function loadChapter(n) {

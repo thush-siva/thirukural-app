@@ -1,5 +1,5 @@
 /* Offline support. Bump VERSION whenever app files change. */
-const VERSION = 'kural-v3';
+const VERSION = 'kural-v4';
 const SHELL = [
   './',
   'index.html',
