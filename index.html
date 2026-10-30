@@ -24,7 +24,6 @@
   <!-- Home header -->
   <header class="home-head">
     <h1 lang="ta">திருக்குறள்</h1>
-    <p>Three sections. 133 chapters. 1,330 kurals.</p>
   </header>
 
   <!-- Open-section header -->
@@ -70,10 +69,42 @@
     </div>
   </section>
 
+  <!-- Search -->
+  <section class="panel" id="search-view" aria-labelledby="search-title" aria-hidden="true" inert>
+    <div class="panel-head">
+      <h2 class="panel-title" id="search-title">Find a kural</h2>
+      <p class="panel-sub">Describe what you're going through. You'll get kurals that speak to it.</p>
+    </div>
+    <form class="search-box" id="search-form" role="search">
+      <label class="sr" for="q">Describe your situation</label>
+      <textarea id="q" rows="2" enterkeyhint="search" autocomplete="off" placeholder="My manager criticised my work in front of the team"></textarea>
+      <button type="submit" class="search-go" aria-label="Find kurals">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+    <div class="chips" id="search-chips" aria-label="Try one of these"></div>
+    <p class="kicker results-kicker" id="search-meta" aria-live="polite"></p>
+    <ol class="results" id="search-results"></ol>
+  </section>
+
+  <!-- Saved -->
+  <section class="panel" id="saved-view" aria-labelledby="saved-title" aria-hidden="true" inert>
+    <div class="panel-head">
+      <h2 class="panel-title" id="saved-title">Saved</h2>
+      <p class="panel-sub" id="saved-sub"></p>
+    </div>
+    <ol class="results" id="saved-list"></ol>
+    <div class="empty" id="saved-empty">
+      <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>
+      <p>Tap the bookmark on any kural to keep it here.</p>
+      <button type="button" class="glass pill-btn" id="saved-find">Find a kural</button>
+    </div>
+  </section>
+
   <!-- Tab bar -->
   <nav class="tabbar" aria-label="Main">
     <div class="glass tabs">
-      <button type="button" class="tab active" aria-current="page">
+      <button type="button" class="tab active" id="tab-home" aria-current="page">
         <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h6a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4z"/><path d="M20 5h-6a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h6z"/></svg>
         Thirukkural
       </button>
@@ -82,7 +113,7 @@
         Saved
       </button>
     </div>
-    <button type="button" class="glass round big" aria-label="Ask: find a kural for a moment" data-toast="Ask, a kural for any moment, is in design.">
+    <button type="button" class="glass round big" id="tab-search" aria-label="Search: find a kural for your situation">
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
     </button>
   </nav>
@@ -148,6 +179,7 @@
 </main>
 
 <script src="js/config.js"></script>
+<script src="js/search.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

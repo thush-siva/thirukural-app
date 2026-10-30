@@ -76,9 +76,6 @@
     const t = e.target.closest('[data-toast]');
     if (t) toast(t.dataset.toast);
   });
-  $('#tab-saved').addEventListener('click', () => {
-    toast(savedSet.size ? 'You have ' + savedSet.size + ' saved ' + (savedSet.size === 1 ? 'kural' : 'kurals') + '. A Saved screen is next.' : 'Tap the bookmark on any kural to save it.');
-  });
 
   /* ---------- Kolam cover patterns ---------- */
   function kolam(kind) {
@@ -262,7 +259,7 @@
   $('#close-section').addEventListener('click', closeSection);
 
   document.addEventListener('keydown', (e) => {
-    if (R.open || !SECTIONS.length) return;
+    if (R.open || !SECTIONS.length || view !== 'home') return;
     if (!state.open && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
       const n = Math.max(0, Math.min(2, state.focus + (e.key === 'ArrowRight' ? 1 : -1)));
       if (n !== state.focus) { state.focus = n; layout(); renderChapters(); books[n].focus({ preventScroll: true }); }
@@ -334,7 +331,7 @@
     track.style.height = n * PAGE_H + 'px';
     track.style.transform = 'translateY(' + (-R.idx * PAGE_H) + 'px)';
   };
-  const R = { open: false, ch: null, idx: 0, sel: null, study: false, playing: false, wheelLock: false };
+  const R = { from: 'home', prevOpen: false, open: false, ch: null, idx: 0, sel: null, study: false, playing: false, wheelLock: false };
   const chapterCache = new Map();
 
   async function loadChapter(n) {
@@ -346,12 +343,16 @@
     return ch;
   }
 
-  async function openReader(chNum, startIdx) {
+  async function openReader(chNum, startIdx, from) {
     let ch;
     try { ch = await loadChapter(chNum); } catch (e) { toast('This chapter did not load. Check your connection and try again.'); return; }
+    R.from = from || 'home';
+    R.prevOpen = state.open;
+    R.prevFocus = state.focus;
+    if (R.from === 'home' && view !== 'home') setView('home');
     const sIdx = SECTIONS.findIndex((s) => s.id === ch.section);
     if (sIdx !== state.focus) { state.focus = sIdx; layout(); renderChapters(); }
-    if (!state.open) { state.open = true; layout(); }
+    if (!state.open && R.from === 'home') { state.open = true; layout(); }
     const s = SECTIONS[sIdx];
     lastChapter[s.id] = chNum;
     store.set('last', lastChapter);
@@ -374,6 +375,19 @@
     reader.classList.remove('in');
     reader.setAttribute('aria-hidden', 'true');
     if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+    if (R.from !== 'home') {
+      // Back to Search or Saved, leaving the shelf as it was
+      const n = R.ch.kurals[R.idx].n;
+      state.open = R.prevOpen; state.focus = R.prevFocus;
+      renderChapters(); layout();
+      if (R.from === 'saved') renderSaved();
+      setTimeout(() => {
+        reader.classList.remove('out');
+        const b = $('#' + (R.from === 'saved' ? 'saved-list' : 'search-results') + ' .result[data-n="' + n + '"]');
+        if (b) b.focus({ preventScroll: false });
+      }, 450);
+      return;
+    }
     renderChapters();
     layout();
     const card = $('.ch-card.on');
@@ -385,8 +399,9 @@
     const ch = R.ch, n = ch.kurals.length;
     $('#r-ta').textContent = ch.ta;
     $('#r-sub').textContent = 'Chapter ' + ch.num + ' · ' + ch.en;
-    $('#r-back').setAttribute('aria-label', 'Back to Section ' + s.num + ', ' + s.en);
-    $('#pull-hint').textContent = 'Release to return to ' + s.en;
+    const backTo = R.from === 'search' ? 'Search' : R.from === 'saved' ? 'Saved' : null;
+    $('#r-back').setAttribute('aria-label', backTo ? 'Back to ' + backTo : 'Back to Section ' + s.num + ', ' + s.en);
+    $('#pull-hint').textContent = 'Release to return to ' + (backTo || s.en);
     track.innerHTML = ch.kurals.map((k, i) =>
       '<section class="page" data-i="' + i + '" aria-label="Kural ' + k.n + '">' +
         '<img class="bg" src="' + art(ch.num) + '" alt="" draggable="false" style="object-position:' + ((i * 11) % 100) + '% 50%">' +
@@ -601,6 +616,125 @@
     }
   }
 
+  /* ---------- Views: Thirukkural, Saved, Search ---------- */
+  let view = 'home';
+  const tabHome = $('#tab-home'), tabSaved = $('#tab-saved'), tabSearch = $('#tab-search');
+  const searchView = $('#search-view'), savedView = $('#saved-view');
+  const titles = () => {
+    const t = {};
+    SECTIONS.forEach((s) => s.chapters.forEach((c) => { t[c.n] = c.en; }));
+    return t;
+  };
+
+  function setView(v) {
+    view = v;
+    phone.dataset.view = v;
+    [[searchView, 'search'], [savedView, 'saved']].forEach(([el, name]) => {
+      const on = v === name;
+      el.classList.toggle('on', on);
+      el.setAttribute('aria-hidden', on ? 'false' : 'true');
+      if (on) el.removeAttribute('inert'); else el.setAttribute('inert', '');
+    });
+    [[tabHome, 'home'], [tabSaved, 'saved']].forEach(([b, name]) => {
+      b.classList.toggle('active', v === name);
+      if (v === name) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    tabSearch.classList.toggle('active', v === 'search');
+    if (v === 'search') tabSearch.setAttribute('aria-current', 'page'); else tabSearch.removeAttribute('aria-current');
+    if (v === 'saved') renderSaved();
+  }
+
+  tabHome.addEventListener('click', () => {
+    if (view === 'home' && state.open) closeSection();
+    setView('home');
+  });
+  tabSaved.addEventListener('click', () => { setView('saved'); savedView.scrollTop = 0; });
+  tabSearch.addEventListener('click', () => {
+    setView('search');
+    KuralSearch.load(titles()).catch(() => {});
+    setTimeout(() => { if (!$('#search-results').children.length) $('#q').focus({ preventScroll: true }); }, 350);
+  });
+  $('#saved-find').addEventListener('click', () => tabSearch.click());
+
+  function resultCard(k, i, chapterName) {
+    return '<li><button type="button" class="result" data-n="' + k.n + '" style="--d:' + (Math.min(i, 8) * 0.05).toFixed(2) + 's">' +
+      '<span class="r-meta">Kural ' + k.n + ' · ' + esc(chapterName) + '</span>' +
+      '<span class="r-ta" lang="ta">' + esc(k.ta) + '</span>' +
+      '<span class="r-m">' + esc(k.m) + '</span>' +
+    '</button></li>';
+  }
+
+  function openKural(n, from) {
+    for (const s of SECTIONS) {
+      const c = s.chapters.find((x) => n >= x.start && n <= x.end);
+      if (c) { openReader(c.n, n - c.start, from); return; }
+    }
+  }
+  [$('#search-results'), $('#saved-list')].forEach((list, i) => list.addEventListener('click', (e) => {
+    const b = e.target.closest('.result');
+    if (b) openKural(+b.dataset.n, i === 0 ? 'search' : 'saved');
+  }));
+
+  // Saved
+  async function renderSaved() {
+    const list = $('#saved-list'), empty = $('#saved-empty'), sub = $('#saved-sub');
+    const nums = [...savedSet].reverse();
+    sub.textContent = nums.length ? nums.length + (nums.length === 1 ? ' kural' : ' kurals') + ', newest first' : 'Kurals you save show up here.';
+    empty.classList.toggle('on', !nums.length);
+    if (!nums.length) { list.innerHTML = ''; return; }
+    try { await KuralSearch.load(titles()); } catch (e) { list.innerHTML = ''; sub.textContent = 'Your saved kurals did not load. Check your connection.'; return; }
+    const t = titles();
+    list.innerHTML = nums.map((n, i) => { const k = KuralSearch.get(n); return k ? resultCard(k, i, t[k.c]) : ''; }).join('');
+  }
+
+  // Search
+  const EXAMPLES = [
+    'My manager criticised my work', 'I can’t control my anger', 'A friend let me down', 'I keep procrastinating',
+    'Missing someone far away', 'I lost someone close to me', 'Should I quit my job?', 'Saving money'
+  ];
+  $('#search-chips').innerHTML = EXAMPLES.map((x) => '<button type="button" class="chip-btn">' + esc(x) + '</button>').join('');
+  $('#search-chips').addEventListener('click', (e) => {
+    const b = e.target.closest('.chip-btn');
+    if (!b) return;
+    $('#q').value = b.textContent;
+    runSearch(true);
+  });
+
+  const qEl = $('#q');
+  function growQ() { qEl.style.height = 'auto'; qEl.style.height = Math.min(140, qEl.scrollHeight) + 'px'; }
+  let searchTimer = 0, lastQuery = '';
+  async function runSearch(done) {
+    const text = qEl.value.trim();
+    growQ();
+    if (done) qEl.blur();
+    if (text === lastQuery && !done) return;
+    lastQuery = text;
+    const meta = $('#search-meta'), list = $('#search-results');
+    $('#search-chips').hidden = !!text;
+    if (!text) { meta.textContent = ''; list.innerHTML = ''; return; }
+    try { await KuralSearch.load(titles()); } catch (e) { meta.textContent = 'Search did not load. Check your connection and try again.'; return; }
+    if (text !== qEl.value.trim()) return;
+    const r = KuralSearch.query(text, 12);
+    if (!r.results.length) {
+      meta.textContent = 'No kurals matched. Try describing it another way.';
+      list.innerHTML = '';
+      $('#search-chips').hidden = false;
+      return;
+    }
+    meta.textContent = r.themes.length ? 'Kurals on ' + r.themes.join(', ').replace(/, ([^,]*)$/, ' and $1') : 'Kurals that mention your words';
+    const t = titles();
+    list.innerHTML = r.results.map((k, i) => resultCard(k, i, t[k.c])).join('');
+  }
+  qEl.addEventListener('input', () => {
+    growQ();
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => runSearch(false), 350);
+  });
+  qEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); clearTimeout(searchTimer); runSearch(true); }
+  });
+  $('#search-form').addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(searchTimer); runSearch(true); });
+
   /* ---------- Start ---------- */
   async function start() {
     let index;
@@ -621,6 +755,7 @@
     buildShelf();
     layout();
     renderChapters();
+    setView('home');
     phone.classList.add('ready');
     openFromHash();
   }

@@ -31,6 +31,7 @@ SMALL_WORDS = {'a', 'an', 'and', 'as', 'at', 'by', 'for', 'from', 'in', 'into', 
 
 
 def title_case(s):
+    s = s.replace('"s ', "'s ")
     out = []
     for i, w in enumerate(s.split()):
         if w.isupper():
@@ -60,6 +61,7 @@ def main():
 
     os.makedirs(os.path.join(OUT, 'chapters'), exist_ok=True)
     index = {'sections': []}
+    search = []
     glossed_count = 0
 
     for sec in detail:
@@ -82,6 +84,7 @@ def main():
                         has_glosses = False
                         lines = [tokens(k['Line1'], k['transliteration1'], False),
                                  tokens(k['Line2'], k['transliteration2'], False)]
+                    search.append([kn, n, k['Line1'] + '\n' + k['Line2'], k['explanation'].strip()])
                     chapter_kurals.append({
                         'n': kn,
                         'l': lines,
@@ -104,6 +107,10 @@ def main():
 
     with open(os.path.join(OUT, 'index.json'), 'w', encoding='utf-8') as f:
         json.dump(index, f, ensure_ascii=False, separators=(',', ':'))
+
+    # Compact index for search and the Saved screen: [number, chapter, Tamil, meaning]
+    with open(os.path.join(OUT, 'search.json'), 'w', encoding='utf-8') as f:
+        json.dump(search, f, ensure_ascii=False, separators=(',', ':'))
 
     total = sum(len(s['chapters']) for s in index['sections'])
     print('Sections: %d, chapters: %d, kurals: %d, with word glosses: %d'

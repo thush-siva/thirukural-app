@@ -1,10 +1,11 @@
 /* Offline support. Bump VERSION whenever app files change. */
-const VERSION = 'kural-v5';
+const VERSION = 'kural-v6';
 const SHELL = [
   './',
   'index.html',
   'css/styles.css',
   'js/config.js',
+  'js/search.js',
   'js/app.js',
   'data/index.json',
   'assets/chapter-placeholder.jpg',
@@ -34,7 +35,7 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  const isChapter = url.pathname.includes('/data/chapters/');
+  const isChapter = url.pathname.includes('/data/chapters/') || url.pathname.endsWith('/data/search.json');
   const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
 
   if (isChapter || isFont) {

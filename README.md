@@ -13,6 +13,8 @@ A visual reader for all 1,330 kurals of the Thirukkural. Three sections appear a
 - All 3 sections, 133 chapters and 1,330 kurals, loaded one chapter at a time
 - Swipe, scroll or use arrow keys to move between kurals. The end of a chapter returns you to its section
 - Tap a word for its pronunciation and meaning, or turn on word by word study mode
+- Search by describing a situation, like "a friend let me down", to find kurals that speak to it
+- Saved kurals have their own screen
 - Reading progress, saved kurals and your last position are kept on the device
 - Every kural has its own link, for example `#kural-393`
 - Installable to the home screen, and works offline once chapters have been opened
@@ -40,9 +42,11 @@ Once the site is live on GitHub Pages:
 index.html               App markup
 css/styles.css           All styling
 js/config.js             Section colours and chapter artwork
+js/search.js             Scenario search (themes and text ranking, runs on the device)
 js/app.js                App logic
 data/index.json          Sections and chapters (generated)
 data/chapters/NNN.json   Kurals for each chapter (generated)
+data/search.json         All kurals in one file for Search and Saved (generated)
 data-src/                Source data and draft word meanings
 scripts/build_data.py    Builds data/ from data-src/
 sw.js                    Offline support
@@ -61,6 +65,10 @@ python3 scripts/build_data.py
 Word meanings live in `data-src/glosses.json`, keyed by kural number. Each word is `[tamil, transliteration, meaning]`. Kurals without an entry still show pronunciation where available.
 
 When app files change, bump `VERSION` in `sw.js` so installed copies pick up the update.
+
+## How search works
+
+Search runs on the device, with no server or AI model. Everyday words are mapped to themes in `js/search.js` (for example "boss" and "manager" map to the chapters on conduct at court and correcting faults). Kurals in those chapters are ranked by how well their English meaning matches the words typed. To improve results, edit the `THEMES` list.
 
 ## Chapter artwork
 
