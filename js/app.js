@@ -159,10 +159,13 @@
     }));
   }
 
-  function resumeInfo(s) {
-    const last = lastChapter[s.id];
-    if (last) return { label: 'Continue chapter ' + last, chapter: last };
-    return { label: 'Start at Kural ' + s.chapters[0].start, chapter: s.chapters[0].n };
+  // When a section is open, its book shrinks into the top right, beside the section title
+  function openBookPos() {
+    const W = phone.offsetWidth, scale = 0.3;
+    const to = parseFloat(phone.style.getPropertyValue('--to')) || 0;
+    const dx = (W - 24 - 95 * scale) - W / 2;
+    const dy = (112 + to + 138 * scale) - (stage.offsetTop + 90 + 138);
+    return 'translate3d(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px,0px) rotateX(0deg) rotateY(-14deg) scale(' + scale + ')';
   }
 
   function layout() {
@@ -182,7 +185,7 @@
         pos = isF ? 'translate3d(0px,0px,0px) rotateX(0deg) rotateY(0deg) scale(1)'
           : 'translate3d(' + off * 176 + 'px,8px,-170px) rotateX(0deg) rotateY(' + (-off * 34) + 'deg) scale(0.84)';
       } else {
-        pos = isF ? 'translate3d(59px,-150px,0px) rotateX(16deg) rotateY(0deg) scale(0.62)'
+        pos = isF ? openBookPos()
           : 'translate3d(' + off * 430 + 'px,-110px,-200px) rotateX(0deg) rotateY(' + (-off * 70) + 'deg) scale(0.6)';
       }
       b.querySelector('.pos').style.transform = pos;
@@ -193,7 +196,7 @@
       b.classList.toggle('focused', isF);
       const cover = b.querySelector('.cover');
       cover.style.transitionDelay = open ? '.12s' : '0s';
-      cover.style.transform = 'translateZ(15.5px) rotateY(' + (open && isF ? -166 : 0) + 'deg)';
+      cover.style.transform = 'translateZ(15.5px) rotateY(0deg)';
       const sec = SECTIONS[i];
       b.setAttribute('aria-label', open ? 'Section ' + sec.num + ', ' + sec.en + ', open'
         : (isF ? 'Open Section ' + sec.num + ', ' + sec.en : 'Show Section ' + sec.num + ', ' + sec.en));
@@ -209,7 +212,8 @@
     $('#info-ta').textContent = s.taBook;
     $('#info-en').textContent = s.en + ' · Kurals ' + s.kurals;
     $('#open-chip').textContent = 'Section ' + s.num + ' · ' + s.en;
-    $('#resume-label').textContent = resumeInfo(s).label;
+    $('#sec-kicker').textContent = s.chapters.length + ' chapters · ' + s.parts.length + (s.parts.length === 1 ? ' part' : ' parts');
+    $('#sec-ta').textContent = s.taBook;
     $('#open-section').setAttribute('aria-label', 'Open Section ' + s.num + ', ' + s.en);
     tilt();
   }
@@ -251,8 +255,8 @@
 
   function openSection() {
     state.open = true; state.pressed = false; layout();
-    centerCard($('.ch-card.on'));
-    setTimeout(() => { const c = $('.ch-card.on') || $('.ch-card'); if (c) c.focus({ preventScroll: true }); }, 500);
+    showCurrentCard();
+    setTimeout(() => { const c = $('.ch-card.cur') || $('.ch-card'); if (c) c.focus({ preventScroll: true }); }, 500);
   }
   function closeSection() { state.open = false; state.tx = 0; state.ty = 0; layout(); books[state.focus].focus({ preventScroll: true }); }
   $('#open-section').addEventListener('click', openSection);
@@ -266,59 +270,68 @@
     } else if (state.open && e.key === 'Escape') closeSection();
   });
 
-  /* ---------- Chapters ---------- */
+  /* ---------- Chapters, grouped by the section's parts ---------- */
+  const partOf = (s, n) => Math.max(0, s.parts.findIndex((p) => n >= p.first && n <= p.last));
+  const chosenPart = {};
+  const scroller = $('#ch-scroll');
+
   function renderChapters() {
     const s = SECTIONS[state.focus];
     const last = lastChapter[s.id];
-    $('#ch-row').innerHTML = s.chapters.map((c, j) => {
+    if (chosenPart[s.id] == null) chosenPart[s.id] = last ? partOf(s, last) : 0;
+    const pi = chosenPart[s.id];
+    $('#parts').innerHTML = s.parts.map((p, i) => {
+      const n = p.last - p.first + 1;
+      return '<button type="button" class="part" role="tab" data-p="' + i + '" aria-selected="' + (i === pi) + '" aria-controls="ch-grid">' +
+        '<span class="p-ta" lang="ta">' + esc(p.ta) + '</span>' +
+        '<span class="p-en">' + esc(p.en) + ' · ' + n + '</span></button>';
+    }).join('');
+    const part = s.parts[pi];
+    const list = s.chapters.filter((c) => c.n >= part.first && c.n <= part.last);
+    $('#ch-grid').innerHTML = list.map((c, j) => {
       const read = chapterRead(c), total = c.end - c.start + 1;
-      return '<div class="ch-wrap" style="--d:' + (0.3 + Math.min(j, 8) * 0.05).toFixed(2) + 's">' +
-        '<button type="button" class="ch-card" data-j="' + j + '" aria-label="Chapter ' + c.n + ', ' + esc(c.en) + '">' +
-          '<img src="' + art(c.n) + '" alt="" loading="lazy" style="object-position:' + ((c.n * 13) % 100) + '% 50%">' +
-          '<img class="soft" src="' + art(c.n) + '" alt="" aria-hidden="true" loading="lazy" style="object-position:' + ((c.n * 13) % 100) + '% 50%">' +
+      const pos = 'object-position:' + ((c.n * 13) % 100) + '% 50%';
+      const status = read === total ? 'all ' + total + ' read' : read > 0 ? read + ' of ' + total + ' read' : total + ' kurals';
+      return '<div class="ch-wrap" style="--d:' + (0.08 + Math.min(j, 8) * 0.04).toFixed(2) + 's">' +
+        '<button type="button" class="ch-card' + (last === c.n ? ' cur' : '') + '" data-n="' + c.n + '" aria-label="Chapter ' + c.n + ', ' + esc(c.en) + ', ' + status + '">' +
+          '<img src="' + art(c.n) + '" alt="" loading="lazy" style="' + pos + '">' +
+          '<img class="soft" src="' + art(c.n) + '" alt="" aria-hidden="true" loading="lazy" style="' + pos + '">' +
           '<span class="scrim" aria-hidden="true"></span>' +
           '<span class="ch-top"><span class="ch-n">' + c.n + '</span>' + (last === c.n ? '<span class="ch-pill">Reading</span>' : '') + '</span>' +
-          '<span class="ch-bottom"><span class="ch-ta" lang="ta">' + esc(c.ta) + '</span><span class="bar" aria-hidden="true"><span style="width:' + Math.round(read / total * 100) + '%"></span></span></span>' +
-          '<span class="ch-glare" aria-hidden="true"></span>' +
+          '<span class="ch-bottom"><span class="ch-ta" lang="ta">' + esc(c.ta) + '</span><span class="ch-en">' + esc(c.en) + '</span>' +
+          '<span class="bar" aria-hidden="true"><span style="width:' + Math.round(read / total * 100) + '%"></span></span></span>' +
         '</button>' +
       '</div>';
     }).join('');
-    const lastIdx = last ? s.chapters.findIndex((c) => c.n === last) : -1;
-    hoverChapter(lastIdx >= 0 ? lastIdx : state.hov[state.focus]);
   }
 
-  function hoverChapter(j) {
-    const s = SECTIONS[state.focus];
-    const c = s.chapters[j] || s.chapters[0];
-    state.hov[state.focus] = j;
-    document.querySelectorAll('.ch-card').forEach((el) => el.classList.toggle('on', +el.dataset.j === j));
-    const read = chapterRead(c), total = c.end - c.start + 1;
-    $('#ch-kicker').textContent = 'Chapter ' + c.n + ' · ' + (read === total ? 'All ' + total + ' read' : read > 0 ? read + ' of ' + total + ' read' : total + ' kurals');
-    $('#ch-ta').textContent = c.ta;
-    $('#ch-en').textContent = c.en;
+  function showCurrentCard() {
+    const tab = $('.part[aria-selected="true"]');
+    if (tab) { const r = $('#parts'); r.scrollLeft = Math.max(0, tab.offsetLeft - 24); }
+    const card = $('.ch-card.cur');
+    scroller.scrollTop = card ? Math.max(0, card.parentElement.offsetTop - 12) : 0;
   }
 
-  const row = $('#ch-row');
-  function centerCard(card) {
-    if (!card) return;
-    const wrap = card.parentElement;
-    row.scrollLeft = Math.max(0, wrap.offsetLeft - (row.clientWidth - wrap.offsetWidth) / 2);
-  }
   // Keep the frame itself from ever scrolling when something inside takes focus.
   phone.addEventListener('scroll', () => { phone.scrollLeft = 0; phone.scrollTop = 0; });
-  row.addEventListener('pointerover', (e) => { const c = e.target.closest('.ch-card'); if (c && +c.dataset.j !== state.hov[state.focus]) hoverChapter(+c.dataset.j); });
-  row.addEventListener('focusin', (e) => { const c = e.target.closest('.ch-card'); if (c) hoverChapter(+c.dataset.j); });
-  row.addEventListener('click', (e) => {
-    const c = e.target.closest('.ch-card');
-    if (c) openReader(SECTIONS[state.focus].chapters[+c.dataset.j].n, 0);
+  $('#parts').addEventListener('click', (e) => {
+    const b = e.target.closest('.part');
+    if (!b) return;
+    chosenPart[SECTIONS[state.focus].id] = +b.dataset.p;
+    renderChapters();
+    scroller.scrollTop = 0;
+    $('.part[aria-selected="true"]').focus({ preventScroll: true });
   });
-  $('#resume').addEventListener('click', () => {
+  $('#ch-grid').addEventListener('click', (e) => {
+    const c = e.target.closest('.ch-card');
+    if (!c) return;
     const s = SECTIONS[state.focus];
-    const info = resumeInfo(s);
-    const c = s.chapters.find((x) => x.n === info.chapter);
+    const ch = s.chapters.find((x) => x.n === +c.dataset.n);
+    // Pick up at the first unread kural in a chapter already started
     let start = 0;
-    if (c && lastChapter[s.id]) { for (let k = c.start; k <= c.end; k++) { if (!readSet.has(k)) { start = k - c.start; break; } } }
-    openReader(info.chapter, start);
+    const read = chapterRead(ch), total = ch.end - ch.start + 1;
+    if (read > 0 && read < total) { for (let k = ch.start; k <= ch.end; k++) { if (!readSet.has(k)) { start = k - ch.start; break; } } }
+    openReader(ch.n, start);
   });
 
   /* ---------- Reader ---------- */
@@ -352,6 +365,7 @@
     R.prevFocus = state.focus;
     if (R.from === 'home' && view !== 'home') setView('home');
     const sIdx = SECTIONS.findIndex((s) => s.id === ch.section);
+    chosenPart[ch.section] = partOf(SECTIONS[sIdx], chNum);
     if (sIdx !== state.focus) { state.focus = sIdx; layout(); renderChapters(); }
     if (!state.open && R.from === 'home') { state.open = true; layout(); }
     const s = SECTIONS[sIdx];
@@ -389,10 +403,11 @@
       }, 450);
       return;
     }
+    const n = R.ch.num;
     renderChapters();
     layout();
-    const card = $('.ch-card.on');
-    centerCard(card);
+    const card = $('.ch-card[data-n="' + n + '"]');
+    if (card) scroller.scrollTop = Math.max(0, card.parentElement.offsetTop - 12);
     setTimeout(() => { reader.classList.remove('out'); if (card) card.focus({ preventScroll: true }); }, 450);
   }
 

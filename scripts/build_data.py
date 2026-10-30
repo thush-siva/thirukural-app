@@ -43,6 +43,14 @@ def title_case(s):
     return ' '.join(out)
 
 
+# Short English names for the parts (iyal) of each section, for tabs
+PART_NAMES = {
+    'Minister of State': 'Ministers', 'The Essentials of a State': 'The State', 'Way of Making Wealth': 'Wealth',
+    'The Excellence of an Army': 'The Army', 'Miscellaneous': 'Citizenship',
+    'The Pre-marital love': 'Courtship', 'The Post-marital love': 'Marriage'
+}
+
+
 def tokens(line, translit, glossed):
     """Split one Tamil line into words, pairing each with its transliteration."""
     words = line.split()
@@ -68,9 +76,14 @@ def main():
         sid, num = SECTION_IDS[sec['number']]
         section = {
             'id': sid, 'num': num, 'taBook': sec['name'], 'en': sec['translation'],
-            'tr': sec['transliteration'], 'chapters': []
+            'tr': sec['transliteration'], 'chapters': [], 'parts': []
         }
         for group in sec['chapterGroup']['detail']:
+            gch = group['chapters']['detail']
+            section['parts'].append({
+                'ta': group['name'].replace('படையில்', 'படையியல்'), 'en': PART_NAMES.get(group['translation'], group['translation']),
+                'first': gch[0]['number'], 'last': gch[-1]['number']
+            })
             for ch in group['chapters']['detail']:
                 n = ch['number']
                 chapter_kurals = []

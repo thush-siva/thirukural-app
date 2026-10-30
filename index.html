@@ -53,19 +53,15 @@
     </button>
   </section>
 
-  <!-- Chapters in the open section -->
+  <!-- Chapters in the open section, grouped by part -->
   <section class="chapters" aria-label="Chapters">
-    <div class="ch-info" aria-live="polite">
-      <span class="kicker" id="ch-kicker">Chapter 40 · 3 of 10 read</span>
-      <span class="ch-info-ta" lang="ta" id="ch-ta">கல்வி</span>
-      <span class="ch-info-en" id="ch-en">Learning</span>
+    <div class="sec-title">
+      <span class="kicker" id="sec-kicker"></span>
+      <h2 class="sec-ta" lang="ta" id="sec-ta"></h2>
     </div>
-    <div class="ch-row" id="ch-row"></div>
-    <div class="ch-actions">
-      <button type="button" class="glass resume" id="resume">
-        <span class="resume-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg></span>
-        <span id="resume-label">Continue chapter 40</span>
-      </button>
+    <div class="parts" id="parts" role="tablist" aria-label="Parts of this section"></div>
+    <div class="ch-scroll" id="ch-scroll">
+      <div class="ch-grid" id="ch-grid" role="tabpanel"></div>
     </div>
   </section>
 
