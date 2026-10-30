@@ -275,6 +275,7 @@
       return '<div class="ch-wrap" style="--d:' + (0.3 + Math.min(j, 8) * 0.05).toFixed(2) + 's">' +
         '<button type="button" class="ch-card" data-j="' + j + '" aria-label="Chapter ' + c.n + ', ' + esc(c.en) + '">' +
           '<img src="' + art(c.n) + '" alt="" loading="lazy" style="object-position:' + ((c.n * 13) % 100) + '% 50%">' +
+          '<img class="soft" src="' + art(c.n) + '" alt="" aria-hidden="true" loading="lazy" style="object-position:' + ((c.n * 13) % 100) + '% 50%">' +
           '<span class="scrim" aria-hidden="true"></span>' +
           '<span class="ch-top"><span class="ch-n">' + c.n + '</span>' + (last === c.n ? '<span class="ch-pill">Reading</span>' : '') + '</span>' +
           '<span class="ch-bottom"><span class="ch-ta" lang="ta">' + esc(c.ta) + '</span><span class="bar" aria-hidden="true"><span style="width:' + Math.round(read / total * 100) + '%"></span></span></span>' +

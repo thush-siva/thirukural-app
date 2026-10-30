@@ -186,16 +186,22 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 }
 .ch-card img {
   position: absolute; left: -16px; top: -16px; width: 164px; height: 210px; max-width: none; object-fit: cover;
-  filter: blur(5px) saturate(1.15); transform: scale(1.12); transition: filter .4s ease, transform .4s var(--spring);
+  filter: saturate(1.1); transform: scale(1.12); transition: filter .4s ease, transform .4s var(--spring);
+}
+/* Sharp image on top, blurred only behind the text at the bottom */
+.ch-card img.soft {
+  filter: blur(10px) saturate(1.15);
+  -webkit-mask-image: linear-gradient(180deg, transparent 38%, #000 62%); mask-image: linear-gradient(180deg, transparent 38%, #000 62%);
 }
 .ch-card .scrim {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(var(--card-rgb), .55) 0%, rgba(var(--card-rgb), .45) 40%, rgba(var(--card-rgb), .94) 100%);
+  background: linear-gradient(180deg, rgba(var(--card-rgb), .3) 0%, rgba(var(--card-rgb), 0) 30%, rgba(var(--card-rgb), 0) 42%, rgba(var(--card-rgb), .55) 68%, rgba(var(--card-rgb), .92) 100%);
   transition: opacity .3s ease;
 }
 .ch-card .ch-glare { position: absolute; inset: 0; background: radial-gradient(circle at 30% 0%, rgba(255, 255, 255, .32), rgba(255, 255, 255, 0) 60%); opacity: 0; transition: opacity .3s ease; }
 .ch-card.on { transform: translateY(-10px) scale(1.1); box-shadow: 0 22px 40px rgba(0, 0, 0, .5); outline-color: rgba(251, 244, 228, .9); }
-.ch-card.on img { filter: blur(2px) saturate(1.15); transform: scale(1.04); }
+.ch-card.on img { transform: scale(1.04); }
+.ch-card.on img.soft { filter: blur(8px) saturate(1.15); }
 .ch-card.on .ch-glare { opacity: 1; }
 .ch-card:focus-visible { outline: 2px solid var(--ink); }
 .ch-top, .ch-bottom { position: relative; display: flex; }
