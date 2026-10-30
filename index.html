@@ -6,6 +6,13 @@
 <title>Thirukkural</title>
 <meta name="description" content="A visual Thirukkural reader. Three 3D sections, chapter cards, and a scrolling reader where you can tap any Tamil word for its meaning.">
 <meta name="theme-color" content="#211508">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kural">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tiro+Tamil&family=Anek+Tamil:wght@400;600&family=Noto+Sans+Tamil:wght@500;600&display=swap">
@@ -39,9 +46,9 @@
   <section class="home-info" aria-live="polite">
     <div class="info-text">
       <div class="dots" id="dots" aria-hidden="true"></div>
-      <span class="kicker" id="info-kicker">Section II · 70 chapters</span>
-      <span class="info-ta" lang="ta" id="info-ta">பொருட்பால்</span>
-      <span class="info-en" id="info-en">Wealth · Kurals 381–1080</span>
+      <span class="kicker" id="info-kicker">Loading</span>
+      <span class="info-ta" lang="ta" id="info-ta"></span>
+      <span class="info-en" id="info-en"></span>
     </div>
     <button type="button" class="glass pill-btn" id="open-section">
       Open
@@ -72,7 +79,7 @@
         <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h6a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4z"/><path d="M20 5h-6a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h6z"/></svg>
         Thirukkural
       </button>
-      <button type="button" class="tab" data-toast="Saved kurals are the next screen to design.">
+      <button type="button" class="tab" id="tab-saved">
         <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>
         Saved
       </button>
@@ -142,7 +149,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </main>
 
-<script src="js/data.js"></script>
+<script src="js/config.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

@@ -1,78 +1,86 @@
 # Thirukkural
 
-A visual reader for the Thirukkural, the 2,000-year-old Tamil classic of 1,330 couplets. Built for the global Tamil community, especially second-generation learners who want to read the original, not just a translation.
+A visual reader for all 1,330 kurals of the Thirukkural. Three sections appear as 3D books. Each book opens to its chapters, and each chapter opens a full-screen reader. Tap any Tamil word to learn it.
 
-**Live prototype:** https://thush-siva.github.io/thirukural-app/
+![Home](docs/01-home.png)
 
-Works best on a phone. On desktop, move your pointer over the sections and use the scroll wheel or arrow keys in the reader.
-
-<p>
-  <img src="docs/01-home.png" width="200" alt="Home screen with the three sections shown as 3D books">
-  <img src="docs/02-section.png" width="200" alt="The Wealth section opened, with chapter cards">
-  <img src="docs/04-word.png" width="200" alt="A kural with one word selected and its meaning in a bottom sheet">
-  <img src="docs/05-word-by-word.png" width="200" alt="Word by word mode, with the transliteration and meaning under every word">
-</p>
+| Section | Reader | Word meaning | Word by word |
+| --- | --- | --- | --- |
+| ![](docs/02-section.png) | ![](docs/03-reader.png) | ![](docs/04-word.png) | ![](docs/05-word-by-word.png) |
 
 ## What it does
 
-- **Three sections as 3D books.** Virtue, Wealth and Love sit on a shelf. The front book tilts and catches light as you move, and tapping it swings the cover open.
-- **Chapters as cards.** Each section opens to a row of chapter cards with their own imagery, reading progress and a bouncy, TV-style focus.
-- **A full-screen reader.** Swipe up through the ten kurals of a chapter. Reaching the end returns you to the section.
-- **Tap any Tamil word.** A sheet slides up with the word, how to say it and what it means, with previous and next to walk through the couplet.
-- **Word by word.** One toggle shows the pronunciation and meaning under every word at once, for study.
-
-## Design decisions
-
-- **The text is the hero.** Navigation is reduced to thin indicators so the couplet fills the screen.
-- **Learning without leaving the page.** Most Kural apps give you a translation. This one teaches you the words, so readers slowly need the translation less.
-- **Each section has its own world.** Colour, cover pattern and imagery change per section. The cover patterns are drawn from kolam, the dot-grid patterns drawn at Tamil doorsteps.
-- **iOS-native feel.** Floating glass controls, spring physics and large type, in the direction of Apple's Liquid Glass.
-
-## Status
-
-This is a design prototype in HTML, CSS and JavaScript. Three sample chapters are included:
-
-| Section | Sample chapter |
-|---|---|
-| I · Virtue | Chapter 1, கடவுள் வாழ்த்து (In Praise of God) |
-| II · Wealth | Chapter 40, கல்வி (Learning) |
-| III · Love | Chapter 109, தகையணங்குறுத்தல் |
-
-Every chapter card in a section opens that section's sample chapter. Audio, Saved and Ask are placeholders.
-
-## Content and accuracy
-
-- The Tamil text of the Thirukkural is in the public domain.
-- Word splits, transliterations and glosses in `js/data.js` are working drafts and have not yet been reviewed by a Tamil scholar.
-- The chapter image is a placeholder. Each chapter will get its own artwork.
-
-## Roadmap
-
-- Native iOS app in SwiftUI, with lock-screen widgets for a daily kural
-- All 1,330 kurals with reviewed word-by-word glosses
-- Original artwork for each of the 133 chapters
-- Audio recitation
-- Saved kurals and "a kural for this moment" search
+- All 3 sections, 133 chapters and 1,330 kurals, loaded one chapter at a time
+- Swipe, scroll or use arrow keys to move between kurals. The end of a chapter returns you to its section
+- Tap a word for its pronunciation and meaning, or turn on word by word study mode
+- Reading progress, saved kurals and your last position are kept on the device
+- Every kural has its own link, for example `#kural-393`
+- Installable to the home screen, and works offline once chapters have been opened
 
 ## Run it locally
 
-No build step. Open `index.html` in a browser, or serve the folder:
+No build step. Serve the folder with any static server:
 
-```
-python3 -m http.server
-```
-
-Then visit http://localhost:8000.
-
-## Structure
-
-```
-index.html        Screens and layout
-css/styles.css    Visual design and motion
-js/data.js        Sections, chapters and kural content
-js/app.js         Interactions
-assets/           Chapter imagery
-docs/             Screenshots
+```sh
+python3 -m http.server 8000
 ```
 
-Designed by Thushjanthan (TJ) Sivagurunathan · [Portfolio](https://www.thushjanthansivagurunathan.xyz)
+Then open http://localhost:8000.
+
+## Install on a phone
+
+Once the site is live on GitHub Pages:
+
+- **iPhone:** open the link in Safari, tap Share, then Add to Home Screen
+- **Android:** open the link in Chrome, then tap Install app
+
+## Project structure
+
+```
+index.html               App markup
+css/styles.css           All styling
+js/config.js             Section colours and chapter artwork
+js/app.js                App logic
+data/index.json          Sections and chapters (generated)
+data/chapters/NNN.json   Kurals for each chapter (generated)
+data-src/                Source data and draft word meanings
+scripts/build_data.py    Builds data/ from data-src/
+sw.js                    Offline support
+manifest.webmanifest     Home screen install settings
+assets/                  Icons and chapter artwork
+```
+
+## Updating content
+
+Edit files in `data-src/`, then rebuild:
+
+```sh
+python3 scripts/build_data.py
+```
+
+Word meanings live in `data-src/glosses.json`, keyed by kural number. Each word is `[tamil, transliteration, meaning]`. Kurals without an entry still show pronunciation where available.
+
+When app files change, bump `VERSION` in `sw.js` so installed copies pick up the update.
+
+## Chapter artwork
+
+Every chapter uses `assets/chapter-placeholder.jpg` for now. To give a chapter its own image, add it to `assets/` and map it in `js/config.js`:
+
+```js
+chapterArt: { 40: 'assets/chapters/040.jpg' }
+```
+
+## Content sources
+
+- **Tamil text:** Thiruvalluvar's Thirukkural is in the public domain
+- **Dataset:** [tk120404/thirukkural](https://github.com/tk120404/thirukkural), Apache License 2.0. A copy of the licence is in `data-src/vendor/tk120404/LICENSE`. Chapter names, transliteration and English meanings come from this dataset
+- **Word meanings:** drafts for chapters 1, 40 and 109 only. These need review by a Tamil scholar before wider release
+
+The dataset also includes Tamil commentaries and a second English translation. These are not used until their rights are confirmed.
+
+## Roadmap
+
+- Word meanings for every chapter
+- Artwork for each chapter
+- Audio recitation
+- Native iOS app for TestFlight
