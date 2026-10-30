@@ -1,5 +1,5 @@
 /* Offline support. Bump VERSION whenever app files change. */
-const VERSION = 'kural-v4';
+const VERSION = 'kural-v5';
 const SHELL = [
   './',
   'index.html',
@@ -9,7 +9,11 @@ const SHELL = [
   'data/index.json',
   'assets/chapter-placeholder.jpg',
   'manifest.webmanifest',
-  'assets/icons/icon-192.png'
+  'assets/icons/icon-192.png',
+  'assets/fonts/anek-tamil-400.woff2',
+  'assets/fonts/anek-tamil-500.woff2',
+  'assets/fonts/anek-tamil-600.woff2',
+  'assets/fonts/anek-tamil-700.woff2'
 ];
 
 self.addEventListener('install', (event) => {
