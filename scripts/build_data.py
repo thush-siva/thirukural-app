@@ -103,6 +103,8 @@ def main():
                         'l': lines,
                         'tr': k['transliteration1'] + ' / ' + k['transliteration2'],
                         'm': k['explanation'].strip(),
+                        # Plain-Tamil explanation: Mu. Varadarasanar's commentary (his works are nationalised in Tamil Nadu)
+                        'u': (k.get('mv') or '').strip(),
                         'glossed': str(kn) in glosses
                     })
                 chapter = {

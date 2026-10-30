@@ -11,7 +11,8 @@ A visual reader for all 1,330 kurals of the Thirukkural. Three sections appear a
 ## What it does
 
 - All 3 sections, 133 chapters and 1,330 kurals, loaded one chapter at a time
-- Swipe, scroll or use arrow keys to move between kurals. The end of a chapter returns you to its section
+- Each kural is a card. Swipe sideways (or use arrow keys) between kurals; the end of a chapter returns you to its section
+- Scroll a card to open it full screen and read what the kural means in plain Tamil; scroll back up to return to the card
 - Tap a word for its pronunciation and meaning, or turn on word by word study mode
 - Search by describing a situation, like "a friend let me down", to find kurals that speak to it
 - Saved kurals have their own screen
@@ -83,10 +84,11 @@ chapterArt: { 40: 'assets/chapters/040.jpg' }
 - **Tamil text:** Thiruvalluvar's Thirukkural is in the public domain
 - **Dataset:** [tk120404/thirukkural](https://github.com/tk120404/thirukkural), Apache License 2.0. A copy of the licence is in `data-src/vendor/tk120404/LICENSE`. Chapter names, transliteration and English meanings come from this dataset
 - **Font:** [Anek Tamil](https://github.com/EkType/Anek), SIL Open Font License 1.1, in `assets/fonts/`
+- **Tamil explanations:** Mu. Varadarasanar's commentary (மு. வரதராசனார் உரை), from the same dataset. His works are nationalised by the Tamil Nadu government; confirm before commercial use
 - **Placeholder artwork:** generated with Google Gemini
 - **Word meanings:** drafts for chapters 1, 40 and 109 only. These need review by a Tamil scholar before wider release
 
-The dataset also includes Tamil commentaries and a second English translation. These are not used until their rights are confirmed.
+The dataset also includes two other Tamil commentaries and a second English translation. These are not used until their rights are confirmed.
 
 ## Roadmap
 
