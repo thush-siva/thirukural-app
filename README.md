@@ -74,6 +74,7 @@ chapterArt: { 40: 'assets/chapters/040.jpg' }
 
 - **Tamil text:** Thiruvalluvar's Thirukkural is in the public domain
 - **Dataset:** [tk120404/thirukkural](https://github.com/tk120404/thirukkural), Apache License 2.0. A copy of the licence is in `data-src/vendor/tk120404/LICENSE`. Chapter names, transliteration and English meanings come from this dataset
+- **Placeholder artwork:** generated with Google Gemini
 - **Word meanings:** drafts for chapters 1, 40 and 109 only. These need review by a Tamil scholar before wider release
 
 The dataset also includes Tamil commentaries and a second English translation. These are not used until their rights are confirmed.
