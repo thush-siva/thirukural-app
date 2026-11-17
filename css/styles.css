@@ -403,6 +403,7 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .translit { margin: 0; font-size: 13px; line-height: 1.4; font-style: italic; color: rgba(251, 244, 228, .82); }
 .study .translit { display: none; }
 .meaning { margin: 4px 0 0; font-size: 18px; line-height: 1.35; font-weight: 600; }
+.k-body .k-label { margin-top: 14px; }
 
 .r-end {
   position: absolute; left: 24px; right: 24px; top: calc(112px + var(--to)); bottom: calc(126px + var(--bo)); z-index: 1;

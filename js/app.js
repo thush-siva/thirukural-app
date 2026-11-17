@@ -447,6 +447,7 @@
               ).join('') + '</div>').join('') +
             '</div>' +
             '<p class="translit">' + esc(k.tr) + '</p>' +
+            '<span class="kicker k-label">Translation</span>' +
             '<p class="meaning">' + esc(k.m) + '</p>' +
           '</div>' +
         '</div>' +
