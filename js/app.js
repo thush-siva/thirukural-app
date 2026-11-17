@@ -159,11 +159,11 @@
 
   // When a section is open, its book shrinks into the top right, beside the section title
   function openBookPos() {
-    // A miniature of the book, centred at the top of the chapters view (centre y 186 on a 390-wide screen)
-    const scale = 0.6;
+    // A miniature of the book, centred at the top of the chapters view (centre y 160 on a 390-wide screen)
+    const scale = 0.435;
     const to = parseFloat(phone.style.getPropertyValue('--to')) || 0;
     const dx = 0;
-    const dy = (186 + to) - (stage.offsetTop + 90 + 138);
+    const dy = (160 + to) - (stage.offsetTop + 90 + 138);
     return 'translate3d(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px,0px) rotateX(0deg) rotateY(0deg) scale(' + scale + ')';
   }
 

@@ -172,11 +172,11 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .chapters { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity .18s ease; }
 .is-open .chapters { opacity: 1; transition: opacity .25s ease; }
 .is-open .chapters > * { pointer-events: auto; }
-.sec-title { position: absolute; top: calc(298px + var(--to)); left: 24px; right: 24px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; }
+.sec-title { position: absolute; top: calc(244px + var(--to)); left: 24px; right: 24px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; }
 .sec-title .kicker { color: rgba(251, 244, 228, .7); }
 .sec-ta { margin: 0; font-family: var(--ta-display); font-weight: 600; font-size: 30px; line-height: 1.3; white-space: nowrap; }
 .parts {
-  position: absolute; top: calc(368px + var(--to)); left: 0; right: 0; display: flex; gap: 8px; overflow-x: auto;
+  position: absolute; top: calc(314px + var(--to)); left: 0; right: 0; display: flex; gap: 8px; overflow-x: auto;
   padding: 2px 24px 6px; scrollbar-width: none; scroll-padding-inline: 24px;
 }
 .parts::-webkit-scrollbar { display: none; }
@@ -190,16 +190,16 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .part .p-en { font-size: 12px; font-weight: 500; opacity: .8; white-space: nowrap; }
 .part[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: #2A1F12; }
 .ch-scroll {
-  position: absolute; top: calc(434px + var(--to)); left: 0; right: 0; bottom: 0; overflow-y: auto; overscroll-behavior: contain;
+  position: absolute; top: calc(384px + var(--to)); left: 0; right: 0; bottom: 0; overflow-y: auto; overscroll-behavior: contain;
   padding: 22px 24px calc(124px + var(--bo)); scrollbar-width: none;
   /* Cards fade out before they reach the tab bar */
   -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 26px, #000 calc(100% - 150px - var(--bo)), transparent calc(100% - 80px - var(--bo)));
   mask-image: linear-gradient(180deg, transparent 0, #000 26px, #000 calc(100% - 150px - var(--bo)), transparent calc(100% - 80px - var(--bo)));
 }
 .ch-scroll::-webkit-scrollbar { display: none; }
-.ch-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.ch-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .ch-card {
-  position: relative; overflow: hidden; width: 100%; height: 128px; padding: 14px; border: 0; border-radius: 22px;
+  position: relative; overflow: hidden; width: 100%; height: 150px; padding: 14px; border: 0; border-radius: 22px;
   display: flex; flex-direction: column; justify-content: space-between; text-align: left; cursor: pointer; color: var(--ink);
   background: var(--card); box-shadow: 0 6px 14px rgba(0, 0, 0, .25);
   transition: transform .4s var(--spring), box-shadow .3s ease;
