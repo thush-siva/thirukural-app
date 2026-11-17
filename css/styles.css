@@ -351,16 +351,21 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
   overflow: hidden; border-radius: 30px; background: var(--card); color: var(--ink);
   border: 1px solid rgba(255, 255, 255, .07); box-shadow: 0 30px 60px var(--r-shadow, rgba(0, 0, 0, .5));
   transform-origin: 50% 120%; cursor: grab;
-  transition: transform .6s var(--spring), opacity .3s ease, left .55s var(--spring), right .55s var(--spring), top .55s var(--spring), bottom .55s var(--spring), border-radius .45s ease;
+  transition: transform .6s var(--spring), opacity .3s ease, left .45s cubic-bezier(.32, .72, 0, 1), right .45s cubic-bezier(.32, .72, 0, 1), top .45s cubic-bezier(.32, .72, 0, 1), bottom .45s cubic-bezier(.32, .72, 0, 1), border-radius .45s cubic-bezier(.32, .72, 0, 1);
 }
 .deck.dragging .kcard { transition: none; cursor: grabbing; }
 .kcard.big { left: 0; right: 0; top: 0; bottom: 0; border-radius: 0; border-color: transparent; z-index: 70 !important; cursor: auto; }
-.k-scroll { position: absolute; inset: 0; overflow-y: hidden; overscroll-behavior: contain; scrollbar-width: none; }
+.k-scroll { position: absolute; inset: 0; overflow-y: hidden; overscroll-behavior: contain; scrollbar-width: none; transition: padding-top .45s cubic-bezier(.32, .72, 0, 1); }
+/* Expanding grows the card outward while its content stays exactly where it is:
+   the card edges move out and the padding grows by the same amount, on the same curve,
+   so text never re-wraps or shifts. */
+.kcard.big .k-scroll { padding-top: calc(112px + var(--to)); }
+.k-body, .k-more { transition: padding-left .45s cubic-bezier(.32, .72, 0, 1), padding-right .45s cubic-bezier(.32, .72, 0, 1); }
+.kcard.big .k-body, .kcard.big .k-more { padding-left: 48px; padding-right: 48px; }
 .k-scroll::-webkit-scrollbar { display: none; }
 .kcard.top .k-scroll { overflow-y: auto; }
 .k-img { position: relative; overflow: hidden; height: 170px; transition: height .5s var(--spring); }
-.kcard.big .k-img { height: calc(220px + var(--to)); }
-.k-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.k-img img { position: absolute; top: 0; left: 50%; width: 460px; height: 100%; transform: translateX(-50%); object-fit: cover; pointer-events: none; }
 .k-img::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(var(--card-rgb), 0) 35%, var(--card) 100%); }
 .study .k-img { height: 0; }
 .k-body { display: flex; flex-direction: column; gap: 12px; padding: 6px 24px 24px; }
