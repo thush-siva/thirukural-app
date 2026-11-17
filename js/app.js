@@ -159,11 +159,11 @@
 
   // When a section is open, its book shrinks into the top right, beside the section title
   function openBookPos() {
-    // A miniature of the book at the top right of the chapters view (95 x 120 slot at x 266, y 57 on a 390-wide screen)
-    const W = phone.offsetWidth, scale = 0.435;
+    // A miniature of the book, centred at the top of the chapters view (centre y 186 on a 390-wide screen)
+    const scale = 0.6;
     const to = parseFloat(phone.style.getPropertyValue('--to')) || 0;
-    const dx = (W - 76.5) - W / 2;
-    const dy = (117 + to) - (stage.offsetTop + 90 + 138);
+    const dx = 0;
+    const dy = (186 + to) - (stage.offsetTop + 90 + 138);
     return 'translate3d(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px,0px) rotateX(0deg) rotateY(0deg) scale(' + scale + ')';
   }
 
@@ -215,7 +215,6 @@
     $('#info-kicker').textContent = s.chapters.length + ' chapters';
     $('#info-ta').textContent = s.taBook;
     $('#info-en').textContent = s.en + ' · Kurals ' + s.kurals;
-    $('#open-chip').textContent = s.en;
     $('#sec-kicker').textContent = s.chapters.length + ' chapters · ' + s.parts.length + (s.parts.length === 1 ? ' part' : ' parts');
     $('#sec-ta').textContent = s.taBook;
     $('#open-section').setAttribute('aria-label', 'Open ' + s.en);
