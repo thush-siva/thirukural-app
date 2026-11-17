@@ -359,8 +359,10 @@
       const img = c.querySelector('.k-img'), sc = c.querySelector('.k-scroll');
       img.style.transition = 'none'; img.style.height = '';
       const over = sc.scrollHeight - sc.clientHeight;
-      if (over > 0) img.style.height = Math.max(64, 170 - over - 8) + 'px';
+      if (over > 0) img.style.height = Math.max(0, 170 - over - 8) + 'px';
       void img.offsetHeight; img.style.transition = '';
+      // If it still doesn't fit (very small screens), the card scrolls
+      c.classList.toggle('scrolls', sc.scrollHeight - sc.clientHeight > 2);
     });
   }
 
