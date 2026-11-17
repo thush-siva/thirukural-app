@@ -28,6 +28,7 @@
      using the space under the status bar and home indicator when there is no system UI there. */
   let scale = 1;
   let onFit = null;
+  let PAGE_H = 844;
   const probe = document.createElement('div');
   probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
   document.body.appendChild(probe);
@@ -48,6 +49,7 @@
     } else {
       scale = Math.min(1, w / 390, h / 844);
     }
+    PAGE_H = H;
     phone.style.width = W + 'px';
     phone.style.height = H + 'px';
     phone.style.setProperty('--ph', H + 'px');
@@ -350,22 +352,19 @@
     openReader(ch.n, start);
   });
 
-  /* ---------- Reader: a deck of kural cards ----------
-     Swipe sideways (or use arrow keys) between kurals. Scroll inside the top card and it
-     expands to full screen to show what the kural means; scroll back to the top and it
-     returns to a card. Swiping past the last kural closes the chapter. */
+  /* ---------- Reader ---------- */
   const reader = $('#reader');
-  const deck = $('#deck');
+  const track = $('#r-track');
+  const rStage = $('#r-stage');
   const sheet = $('#sheet');
-  const R = { from: 'home', prevOpen: false, open: false, ch: null, idx: 0, sel: null, study: false, playing: false, big: false, dx: 0, lock: false };
-  const chapterCache = new Map();
-  let cards = [];
-  onFit = () => { if (R.open) layoutDeck(); };
-
-  const darken = (hex, d) => {
-    const n = parseInt(hex.slice(1, 7), 16), f = (v) => Math.round(v * (1 - d));
-    return [f((n >> 16) & 255), f((n >> 8) & 255), f(n & 255)];
+  onFit = () => {
+    const n = track.children.length;
+    if (!n) return;
+    track.style.height = n * PAGE_H + 'px';
+    track.style.transform = 'translateY(' + (-R.idx * PAGE_H) + 'px)';
   };
+  const R = { from: 'home', prevOpen: false, open: false, ch: null, idx: 0, sel: null, study: false, playing: false, wheelLock: false };
+  const chapterCache = new Map();
 
   async function loadChapter(n) {
     if (chapterCache.has(n)) return chapterCache.get(n);
@@ -390,11 +389,8 @@
     const s = SECTIONS[sIdx];
     lastChapter[s.id] = chNum;
     store.set('last', lastChapter);
-    R.ch = ch; R.sel = null; R.playing = false; R.big = false; R.dx = 0;
-    // Background: the card colour, darkened, so card and screen feel like one surface
-    const g = darken(s.card, 0.78), sh = darken(s.card, 0.9);
-    reader.style.setProperty('--r-ground', 'rgb(' + g.join(',') + ')');
-    reader.style.setProperty('--r-shadow', 'rgba(' + sh.join(',') + ',0.55)');
+    R.ch = ch; R.sel = null; R.playing = false;
+    root.style.setProperty('--ground', s.ground);
     buildReader(s);
     setIdx(Math.max(0, Math.min(ch.kurals.length - 1, startIdx || 0)));
     reader.classList.remove('out');
@@ -408,20 +404,19 @@
     if (!R.open) return;
     R.open = false;
     closeSheet();
-    setBig(false);
     if (finished) reader.classList.add('out');
     reader.classList.remove('in');
     reader.setAttribute('aria-hidden', 'true');
     if (location.hash) history.replaceState(null, '', location.pathname + location.search);
-    const last = R.ch.kurals[Math.min(R.idx, R.ch.kurals.length - 1)].n;
     if (R.from !== 'home') {
       // Back to Search or Saved, leaving the shelf as it was
+      const n = R.ch.kurals[R.idx].n;
       state.open = R.prevOpen; state.focus = R.prevFocus;
       renderChapters(); layout();
       if (R.from === 'saved') renderSaved();
       setTimeout(() => {
         reader.classList.remove('out');
-        const b = $('#' + (R.from === 'saved' ? 'saved-list' : 'search-results') + ' .result[data-n="' + last + '"]');
+        const b = $('#' + (R.from === 'saved' ? 'saved-list' : 'search-results') + ' .result[data-n="' + n + '"]');
         if (b) b.focus({ preventScroll: false });
       }, 450);
       return;
@@ -435,116 +430,59 @@
   }
 
   function buildReader(s) {
-    const ch = R.ch;
-    const backTo = R.from === 'search' ? 'Search' : R.from === 'saved' ? 'Saved' : null;
+    const ch = R.ch, n = ch.kurals.length;
     $('#r-ta').textContent = ch.ta;
     $('#r-sub').textContent = 'Chapter ' + ch.num + ' · ' + ch.en;
+    const backTo = R.from === 'search' ? 'Search' : R.from === 'saved' ? 'Saved' : null;
     $('#r-back').setAttribute('aria-label', backTo ? 'Back to ' + backTo : 'Back to ' + s.en);
-    $('#r-end-ta').textContent = ch.ta;
-    $('#r-end-en').textContent = backTo ? 'Returning to ' + backTo : 'Returning to ' + s.en;
-    deck.innerHTML = ch.kurals.map((k, i) =>
-      '<article class="kcard' + (k.u ? '' : ' no-more') + '" data-i="' + i + '" aria-label="Kural ' + k.n + '">' +
-        '<div class="k-scroll">' +
-          '<div class="k-img"><img src="' + art(ch.num) + '" alt="" draggable="false" style="object-position:' + ((i * 11) % 100) + '% 40%"></div>' +
-          '<div class="k-body">' +
-            '<span class="kicker">Kural ' + k.n + '</span>' +
-            '<div class="couplet" lang="ta" role="group" aria-label="Kural text. Tap a word for its meaning.">' +
-              k.l.map((line, li) => '<div class="line">' + line.map((w, ti) =>
-                '<span class="w"><button type="button" class="word" data-key="' + li + '-' + ti + '" aria-label="' + esc(w[0]) + (w[1] ? ', ' + esc(w[1]) : '') + '">' + esc(w[0]) + '</button>' +
-                '<span class="gloss" lang="en">' + (w[1] ? '<span class="g-tr">' + esc(w[1]) + '</span>' : '') + (w[2] ? '<span class="g-en">' + esc(w[2]) + '</span>' : '') + '</span></span>'
-              ).join('') + '</div>').join('') +
-            '</div>' +
-            '<p class="translit">' + esc(k.tr) + '</p>' +
-            '<p class="meaning">' + esc(k.m) + '</p>' +
+    $('#pull-hint').textContent = 'Release to return to ' + (backTo || s.en);
+    track.innerHTML = ch.kurals.map((k, i) =>
+      '<section class="page" data-i="' + i + '" aria-label="Kural ' + k.n + '">' +
+        '<img class="bg" src="' + art(ch.num) + '" alt="" draggable="false" style="object-position:' + ((i * 11) % 100) + '% 50%">' +
+        '<div class="scrim" aria-hidden="true"></div>' +
+        '<div class="page-text">' +
+          '<span class="kicker">Kural ' + k.n + '</span>' +
+          '<div class="couplet" lang="ta" role="group" aria-label="Kural text. Tap a word for its meaning.">' +
+            k.l.map((line, li) => '<div class="line">' + line.map((w, ti) =>
+              '<span class="w"><button type="button" class="word" data-key="' + li + '-' + ti + '" aria-label="' + esc(w[0]) + (w[1] ? ', ' + esc(w[1]) : '') + '">' + esc(w[0]) + '</button>' +
+              '<span class="gloss" lang="en">' + (w[1] ? '<span class="g-tr">' + esc(w[1]) + '</span>' : '') + (w[2] ? '<span class="g-en">' + esc(w[2]) + '</span>' : '') + '</span></span>'
+            ).join('') + '</div>').join('') +
           '</div>' +
-          (k.u ? '<section class="k-more" aria-label="What it means">' +
-            '<div class="k-rule" aria-hidden="true"></div>' +
-            '<h3>What it means <span lang="ta">பொருள்</span></h3>' +
-            '<p class="k-explain" lang="ta">' + esc(k.u) + '</p>' +
-            '<span class="k-credit">Commentary by Mu. Varadarasanar (<span lang="ta">மு. வரதராசனார்</span>)</span>' +
-          '</section>' : '') +
+          '<p class="translit">' + esc(k.tr) + '</p>' +
+          '<p class="meaning">' + esc(k.m) + '</p>' +
         '</div>' +
-        '<button type="button" class="k-grab" aria-label="Back to card"><span></span></button>' +
-        '<div class="k-hint" aria-hidden="true"><span>What it means <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div>' +
-      '</article>').join('');
-    cards = [...deck.children];
-    cards.forEach((c) => {
-      const sc = c.querySelector('.k-scroll');
-      sc.addEventListener('scroll', () => onCardScroll(c, sc), { passive: true });
-      sc.addEventListener('wheel', (e) => { if (R.big && c.classList.contains('top') && sc.scrollTop <= 0 && e.deltaY < -4) setBig(false); }, { passive: true });
-      let ty = 0;
-      sc.addEventListener('touchstart', (e) => { ty = e.touches[0].clientY; }, { passive: true });
-      sc.addEventListener('touchmove', (e) => { if (R.big && sc.scrollTop <= 0 && e.touches[0].clientY - ty > 40) setBig(false); }, { passive: true });
-      c.querySelector('.k-grab').addEventListener('click', () => { sc.scrollTo({ top: 0, behavior: 'smooth' }); setBig(false); });
-    });
-  }
-
-  function onCardScroll(c, sc) {
-    if (!c.classList.contains('top')) return;
-    const st = sc.scrollTop;
-    c.classList.toggle('scrolled', st > 24);
-    reader.classList.toggle('past-top', st > 60);
-    if (!R.big && st > 8) setBig(true);
-    // Ignore the jump to the top that the resize itself can cause right after expanding
-    else if (R.big && st <= 0 && performance.now() - R.bigAt > 450) setBig(false);
-  }
-
-  function setBig(on) {
-    R.big = on;
-    if (on) R.bigAt = performance.now();
-    reader.classList.toggle('expanded', on);
-    if (!on) reader.classList.remove('past-top');
-    const c = cards[R.idx];
-    if (c) c.classList.toggle('big', on);
-    if (on) closeSheet();
-  }
-
-  // Position every card: the top card, the two waiting behind it, and the ones already swiped away
-  function layoutDeck() {
-    const n = cards.length, idx = R.idx, dx = R.dx;
-    const fwd = dx < 0 ? Math.min(-dx / 220, 1) : 0;
-    const back = dx > 0 && idx > 0 ? Math.min(dx / 260, 1) : 0;
-    cards.forEach((c, i) => {
-      const rel = i - idx;
-      let t, op = 1, z;
-      if (rel < -1) { t = 'translateX(-470px) rotate(-14deg)'; op = 0; }
-      else if (rel === -1) { const x = -470 + 470 * back; t = 'translateX(' + x.toFixed(1) + 'px) rotate(' + (-14 + 14 * back).toFixed(2) + 'deg)'; op = back > 0 ? 1 : 0; }
-      else if (rel === 0) {
-        if (dx < 0 || idx === 0) { const d = idx === 0 && dx > 0 ? dx * 0.3 : dx; t = 'translateX(' + d.toFixed(1) + 'px) rotate(' + (d / 20).toFixed(2) + 'deg)'; }
-        else t = 'translateY(' + (16 * back).toFixed(1) + 'px) scale(' + (1 - 0.06 * back).toFixed(3) + ')';
-      } else if (rel === 1) t = 'translateY(' + (16 - 16 * fwd).toFixed(1) + 'px) scale(' + (0.94 + 0.06 * fwd).toFixed(3) + ')';
-      else if (rel === 2) { t = 'translateY(' + (30 - 14 * fwd).toFixed(1) + 'px) scale(' + (0.88 + 0.06 * fwd).toFixed(3) + ')'; op = 0.7 + 0.3 * fwd; }
-      else { t = 'translateY(40px) scale(0.84)'; op = 0; }
-      z = rel < 0 ? 60 + rel : 50 - rel;
-      c.style.transform = t;
-      c.style.opacity = op;
-      c.style.zIndex = z;
-      c.style.visibility = op === 0 && rel !== -1 ? 'hidden' : 'visible';
-      const on = rel === 0;
-      c.classList.toggle('top', on);
-      c.setAttribute('aria-hidden', on ? 'false' : 'true');
-      if (on) c.removeAttribute('inert'); else c.setAttribute('inert', '');
-    });
-    const pull = idx === n - 1 && dx < 0 ? Math.min(1, -dx / 160) : 0;
-    $('#r-end').style.opacity = idx >= n ? 1 : pull;
+      '</section>').join('');
+    track.style.height = n * PAGE_H + 'px';
+    $('#r-dots').innerHTML = ch.kurals.map((k, i) =>
+      '<button type="button" data-i="' + i + '" class="' + (readSet.has(k.n) ? 'read' : '') + '" aria-label="Kural ' + k.n + '"><span></span></button>').join('');
   }
 
   function markRead(n) {
     if (readSet.has(n)) return;
     readSet.add(n);
     store.set('read', [...readSet]);
+    const dot = $('#r-dots').querySelector('button[data-i="' + R.idx + '"]');
+    if (dot) dot.classList.add('read');
   }
 
   function setIdx(i) {
     const ch = R.ch, n = ch.kurals.length;
-    if (R.big) setBig(false);
-    cards.forEach((c) => c.classList.remove('big'));
-    R.idx = i; R.sel = null; R.dx = 0;
-    deck.classList.remove('dragging');
-    layoutDeck();
-    deck.querySelectorAll('.word.on').forEach((w) => w.classList.remove('on'));
-    $('#r-count').textContent = (i + 1) + ' / ' + n;
-    $('#r-progress').style.width = ((i + 1) / n * 100) + '%';
+    R.idx = i; R.sel = null;
+    track.classList.remove('dragging');
+    track.style.transform = 'translateY(' + (-i * PAGE_H) + 'px)';
+    track.querySelectorAll('.page').forEach((p, j) => {
+      const on = j === i;
+      p.classList.toggle('active', on);
+      p.setAttribute('aria-hidden', on ? 'false' : 'true');
+      if (on) p.removeAttribute('inert'); else p.setAttribute('inert', '');
+    });
+    track.querySelectorAll('.word.on').forEach((w) => w.classList.remove('on'));
+    $('#r-dots').querySelectorAll('button').forEach((b, j) => {
+      b.classList.toggle('cur', j === i);
+      if (j === i) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
+    });
+    $('#r-next-label').textContent = i < n - 1 ? 'Kural ' + ch.kurals[i + 1].n : 'Finish chapter';
+    $('#pull-hint').style.opacity = 0;
     closeSheet();
     syncSave();
     markRead(ch.kurals[i].n);
@@ -553,67 +491,65 @@
 
   function go(i) {
     const n = R.ch.kurals.length;
-    if (i > n - 1) {
-      // Past the last kural: show "Chapter complete", then return
-      R.idx = n; R.dx = 0; layoutDeck();
-      setTimeout(() => closeReader(true), 650);
-      return;
-    }
+    if (i > n - 1) { closeReader(true); return; }
     setIdx(Math.max(0, i));
   }
 
-  // Drag sideways to change kural; vertical movement is left to the card's own scrolling
+  // Drag to change kural
   let drag = null, suppressClick = false;
-  deck.addEventListener('pointerdown', (e) => {
-    if ((e.button !== undefined && e.button !== 0) || R.big || R.idx >= R.ch.kurals.length) return;
-    drag = { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId, cap: false };
+  rStage.addEventListener('pointerdown', (e) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    drag = { y: e.clientY, t: performance.now(), id: e.pointerId, cap: false };
   });
-  deck.addEventListener('pointermove', (e) => {
+  rStage.addEventListener('pointermove', (e) => {
     if (!drag) return;
-    const dx = (e.clientX - drag.x) / scale, dy = (e.clientY - drag.y) / scale;
+    const dy = (e.clientY - drag.y) / scale;
     if (!drag.cap) {
-      if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy)) { if (Math.abs(dy) > 10) drag = null; return; }
+      if (Math.abs(dy) < 6) return;
       drag.cap = true;
-      try { deck.setPointerCapture(drag.id); } catch (err) { /* ignore */ }
-      deck.classList.add('dragging');
+      try { rStage.setPointerCapture(drag.id); } catch (err) { /* ignore */ }
+      track.classList.add('dragging');
+      rStage.classList.add('dragging');
       closeSheet();
     }
-    R.dx = dx;
-    layoutDeck();
+    const n = R.ch.kurals.length;
+    let d = dy;
+    if (R.idx === 0 && d > 0) d *= 0.35;
+    if (R.idx === n - 1 && d < 0) { d *= 0.45; $('#pull-hint').style.opacity = Math.min(1, -dy / 100); }
+    track.style.transform = 'translateY(' + (-R.idx * PAGE_H + d).toFixed(1) + 'px)';
   });
   function endDrag(e) {
     const g = drag; drag = null;
     if (!g || !g.cap) return;
     suppressClick = true;
     setTimeout(() => { suppressClick = false; }, 0);
-    deck.classList.remove('dragging');
-    const dx = (e.clientX - g.x) / scale;
-    const v = dx / Math.max(1, performance.now() - g.t);
-    R.dx = 0;
+    rStage.classList.remove('dragging');
+    const dy = (e.clientY - g.y) / scale;
+    const v = dy / Math.max(1, performance.now() - g.t);
     let i = R.idx;
-    if (dx < -80 || v < -0.5) i += 1; else if (dx > 80 || v > 0.5) i -= 1;
-    if (i === R.idx) layoutDeck(); else go(i);
+    if (dy < -90 || v < -0.5) i += 1; else if (dy > 90 || v > 0.5) i -= 1;
+    go(i);
   }
-  deck.addEventListener('pointerup', endDrag);
-  deck.addEventListener('pointercancel', endDrag);
+  rStage.addEventListener('pointerup', endDrag);
+  rStage.addEventListener('pointercancel', endDrag);
 
-  // Trackpad sideways swipe
-  deck.addEventListener('wheel', (e) => {
-    if (R.big || Math.abs(e.deltaX) < Math.abs(e.deltaY) || Math.abs(e.deltaX) < 30 || R.lock) return;
-    R.lock = true;
-    setTimeout(() => { R.lock = false; }, 650);
-    go(R.idx + (e.deltaX > 0 ? 1 : -1));
-  }, { passive: true });
+  rStage.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    if (R.wheelLock || Math.abs(e.deltaY) < 30) return;
+    R.wheelLock = true;
+    setTimeout(() => { R.wheelLock = false; }, 650);
+    go(R.idx + (e.deltaY > 0 ? 1 : -1));
+  }, { passive: false });
 
   document.addEventListener('keydown', (e) => {
     if (!R.open) return;
-    if (e.key === 'ArrowRight' || (e.key === 'ArrowDown' && !R.big && e.target === document.body)) { e.preventDefault(); go(R.idx + 1); }
-    else if (e.key === 'ArrowLeft' || (e.key === 'ArrowUp' && !R.big && e.target === document.body)) { e.preventDefault(); go(R.idx - 1); }
-    else if (e.key === 'Escape') { if (sheet.classList.contains('open')) closeSheet(); else if (R.big) setBig(false); else closeReader(false); }
+    if (e.key === 'ArrowDown' || e.key === 'PageDown') { e.preventDefault(); go(R.idx + 1); }
+    else if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); go(R.idx - 1); }
+    else if (e.key === 'Escape') { if (sheet.classList.contains('open')) closeSheet(); else closeReader(false); }
   });
 
   // Tap a word
-  deck.addEventListener('click', (e) => {
+  track.addEventListener('click', (e) => {
     const w = e.target.closest('.word');
     if (!w || suppressClick) return;
     const key = w.dataset.key;
@@ -632,7 +568,7 @@
     const w = k.l[li][ti];
     const keys = wordKeys(), pos = keys.indexOf(key);
     R.sel = key;
-    cards[R.idx].querySelectorAll('.word').forEach((el) => el.classList.toggle('on', el.dataset.key === key));
+    track.querySelector('.page.active').querySelectorAll('.word').forEach((el) => el.classList.toggle('on', el.dataset.key === key));
     $('#s-pos').textContent = 'Word ' + (pos + 1) + ' of ' + keys.length;
     $('#s-ta').textContent = w[0];
     $('#s-tr').textContent = w[1] || '';
@@ -648,12 +584,14 @@
     R.sel = null;
     sheet.classList.remove('open');
     sheet.setAttribute('aria-hidden', 'true');
-    deck.querySelectorAll('.word.on').forEach((el) => el.classList.remove('on'));
+    track.querySelectorAll('.word.on').forEach((el) => el.classList.remove('on'));
   }
   $('#s-close').addEventListener('click', closeSheet);
   $('#s-prev').addEventListener('click', () => { const k = wordKeys(), p = k.indexOf(R.sel); if (p > 0) selectWord(k[p - 1]); });
   $('#s-next').addEventListener('click', () => { const k = wordKeys(), p = k.indexOf(R.sel); if (p < k.length - 1) selectWord(k[p + 1]); });
 
+  $('#r-dots').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) go(+b.dataset.i); });
+  $('#r-next').addEventListener('click', () => go(R.idx + 1));
   $('#r-back').addEventListener('click', () => closeReader(false));
 
   const study = $('#r-study');
