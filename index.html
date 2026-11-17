@@ -115,42 +115,47 @@
     </button>
   </nav>
 
-  <!-- Reader -->
+  <!-- Reader: a deck of kural cards. Swipe sideways between kurals; scroll a card to open it full screen. -->
   <section class="reader" id="reader" aria-label="Kural reader" aria-hidden="true">
-    <div class="r-stage" id="r-stage">
-      <div class="r-track" id="r-track"></div>
-    </div>
+    <div class="r-wash" aria-hidden="true"></div>
 
-    <div class="pull-hint" id="pull-hint" aria-hidden="true">Release to return</div>
-
+    <div class="r-headfade" aria-hidden="true"></div>
     <header class="r-head">
       <button type="button" class="glass round" id="r-back" aria-label="Back to Wealth">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
       </button>
       <span class="r-title">
-        <span lang="ta" id="r-ta">கல்வி</span>
-        <span id="r-sub">Chapter 40 · Learning</span>
+        <span lang="ta" id="r-ta"></span>
+        <span id="r-sub"></span>
       </span>
+      <span class="r-head-spacer" aria-hidden="true"></span>
     </header>
 
-    <nav class="r-dots" id="r-dots" aria-label="Kurals in this chapter"></nav>
+    <div class="deck" id="deck" role="group" aria-label="Kural cards. Swipe left for the next kural, right for the previous one."></div>
 
-    <div class="r-actions">
-      <button type="button" class="act glass" id="r-study" aria-label="Word by word" aria-pressed="false">
-        <span aria-hidden="true" lang="ta" class="ta-glyph">அ</span>
-      </button>
-      <button type="button" class="act glass" id="r-save" aria-label="Save kural" aria-pressed="false">
-        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>
-      </button>
-      <button type="button" class="act glass" id="r-share" aria-label="Share kural">
-        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="M7 8l5-5 5 5"/><path d="M5 14v6h14v-6"/></svg>
-      </button>
+    <div class="r-end" id="r-end" aria-hidden="true">
+      <span class="kicker">Chapter complete</span>
+      <span class="r-end-ta" lang="ta" id="r-end-ta"></span>
+      <span class="r-end-en" id="r-end-en"></span>
     </div>
 
-    <button type="button" class="r-next" id="r-next">
-      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
-      <span id="r-next-label">Kural 392</span>
-    </button>
+    <div class="r-bar" id="r-bar">
+      <div class="r-prog-row">
+        <div class="r-progress" aria-hidden="true"><span id="r-progress"></span></div>
+        <span class="r-count" id="r-count" aria-live="polite"></span>
+      </div>
+      <div class="r-buttons">
+        <button type="button" class="r-icon glass" id="r-study" aria-label="Word by word" aria-pressed="false">
+          <span aria-hidden="true" lang="ta" class="ta-glyph">அ</span>
+        </button>
+        <button type="button" class="r-icon glass" id="r-save" aria-label="Save kural" aria-pressed="false">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>
+        </button>
+        <button type="button" class="r-icon glass" id="r-share" aria-label="Share kural">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="M7 8l5-5 5 5"/><path d="M5 14v6h14v-6"/></svg>
+        </button>
+      </div>
+    </div>
 
     <section class="sheet" id="sheet" aria-label="Word meaning" aria-hidden="true">
       <div class="sheet-top">
