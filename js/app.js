@@ -121,7 +121,7 @@
             '<div class="f spine" style="background:' + s.spine + '"></div>' +
             '<div class="f edge-r"></div><div class="f edge-t"></div>' +
             '<div class="inner">' +
-              '<span class="inner-kicker">Section ' + s.num + ' · ' + esc(s.en) + '</span>' +
+              '<span class="inner-kicker">' + esc(s.en) + '</span>' +
               '<span class="inner-title" lang="ta">' + esc(s.taBook) + '</span>' +
               '<span class="inner-rule" style="background:' + s.cover + '"></span>' +
               '<span class="inner-meta">Chapters ' + s.range + '<br>Kurals ' + s.kurals + '</span>' +
@@ -133,7 +133,7 @@
                   '<path d="' + k.dots + '" fill="rgba(251,244,228,0.85)"/>' +
                 '</svg>' +
                 '<span class="frame" aria-hidden="true"></span>' +
-                '<div class="title"><span class="kick">Section ' + s.num + '</span><span class="ta" lang="ta">' + esc(s.ta) + '</span><span class="en">' + esc(s.en) + '</span></div>' +
+                '<div class="title"><span class="ta" lang="ta">' + esc(s.ta) + '</span><span class="en">' + esc(s.en) + '</span></div>' +
                 '<div class="glare" aria-hidden="true"></div>' +
               '</div>' +
               '<div class="inside" style="background:' + s.spine + '">' +
@@ -196,8 +196,7 @@
       cover.style.transitionDelay = open ? '.12s' : '0s';
       cover.style.transform = 'translateZ(15.5px) rotateY(0deg)';
       const sec = SECTIONS[i];
-      b.setAttribute('aria-label', open ? 'Section ' + sec.num + ', ' + sec.en + ', open'
-        : (isF ? 'Open Section ' + sec.num + ', ' + sec.en : 'Show Section ' + sec.num + ', ' + sec.en));
+      b.setAttribute('aria-label', open ? sec.en + ', open' : (isF ? 'Open ' + sec.en : 'Show ' + sec.en));
     });
     shadows.forEach((sh, i) => {
       const off = i - focus, isF = off === 0;
@@ -206,13 +205,13 @@
     });
     dotEls.forEach((d, i) => d.classList.toggle('on', i === focus));
 
-    $('#info-kicker').textContent = 'Section ' + s.num + ' · ' + s.chapters.length + ' chapters';
+    $('#info-kicker').textContent = s.chapters.length + ' chapters';
     $('#info-ta').textContent = s.taBook;
     $('#info-en').textContent = s.en + ' · Kurals ' + s.kurals;
-    $('#open-chip').textContent = 'Section ' + s.num + ' · ' + s.en;
+    $('#open-chip').textContent = s.en;
     $('#sec-kicker').textContent = s.chapters.length + ' chapters · ' + s.parts.length + (s.parts.length === 1 ? ' part' : ' parts');
     $('#sec-ta').textContent = s.taBook;
-    $('#open-section').setAttribute('aria-label', 'Open Section ' + s.num + ', ' + s.en);
+    $('#open-section').setAttribute('aria-label', 'Open ' + s.en);
     tilt();
   }
 
@@ -421,7 +420,7 @@
     const backTo = R.from === 'search' ? 'Search' : R.from === 'saved' ? 'Saved' : null;
     $('#r-ta').textContent = ch.ta;
     $('#r-sub').textContent = 'Chapter ' + ch.num + ' · ' + ch.en;
-    $('#r-back').setAttribute('aria-label', backTo ? 'Back to ' + backTo : 'Back to Section ' + s.num + ', ' + s.en);
+    $('#r-back').setAttribute('aria-label', backTo ? 'Back to ' + backTo : 'Back to ' + s.en);
     $('#r-end-ta').textContent = ch.ta;
     $('#r-end-en').textContent = backTo ? 'Returning to ' + backTo : 'Returning to ' + s.en;
     deck.innerHTML = ch.kurals.map((k, i) =>
@@ -524,7 +523,6 @@
     $('#r-count').textContent = (i + 1) + ' / ' + n;
     $('#r-progress').style.width = ((i + 1) / n * 100) + '%';
     closeSheet();
-    setPlaying(false);
     syncSave();
     markRead(ch.kurals[i].n);
     history.replaceState(null, '', '#kural-' + ch.kurals[i].n);
@@ -651,18 +649,6 @@
     if (savedSet.has(n)) savedSet.delete(n); else { savedSet.add(n); toast('Kural ' + n + ' saved'); }
     store.set('saved', [...savedSet]);
     syncSave();
-  });
-
-  let audioToasted = false;
-  function setPlaying(on) {
-    R.playing = on;
-    $('#r-play').setAttribute('aria-label', on ? 'Pause' : 'Listen');
-    $('#r-play-label').textContent = on ? 'Pause' : 'Listen';
-    $('#r-play-icon').setAttribute('d', on ? 'M6 5h4v14H6zM14 5h4v14h-4z' : 'M7 4.5v15l12-7.5z');
-  }
-  $('#r-play').addEventListener('click', () => {
-    setPlaying(!R.playing);
-    if (R.playing && !audioToasted) { audioToasted = true; toast('Audio recitation is not recorded yet.'); }
   });
 
   $('#r-share').addEventListener('click', async () => {

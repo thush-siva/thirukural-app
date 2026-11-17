@@ -84,7 +84,7 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 /* Headers */
 .home-head { position: absolute; top: calc(60px + var(--to)); left: 24px; right: 24px; display: flex; flex-direction: column; gap: 4px; transition: opacity .35s ease; }
 .home-head h1 { margin: 0; font-family: var(--ta-display); font-weight: 600; font-size: 40px; line-height: 1.2; }
-.home-head p { margin: 0; font-size: 15px; color: var(--ink-2); }
+.home-head p { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: .01em; color: var(--ink-2); }
 .open-head { position: absolute; top: calc(54px + var(--to)); left: 16px; right: 16px; display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: opacity .35s ease; }
 .is-open .home-head, .is-open .home-info { opacity: 0; pointer-events: none; }
 .is-open .open-head { opacity: 1; pointer-events: auto; }
@@ -139,7 +139,7 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
   text-align: left; color: var(--ink); transition: transform .4s var(--spring);
 }
 .book .title .kick { font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; opacity: .85; }
-.book .title .ta { font-family: var(--ta-display); font-weight: 600; font-size: 30px; line-height: 1.25; white-space: nowrap; }
+.book .title .ta { font-family: var(--ta-display); font-weight: 600; font-size: 25px; line-height: 1.25; white-space: nowrap; }
 .book .title .en { font-size: 15px; font-weight: 600; }
 .book .glare { position: absolute; inset: 0; opacity: 0; transition: opacity .35s ease; pointer-events: none; }
 .book.focused .glare { opacity: 1; }
@@ -156,7 +156,7 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .dots span { height: 6px; width: 6px; border-radius: 3px; background: var(--ink); opacity: .4; transition: width .75s var(--spring), opacity .35s ease; }
 .dots span.on { width: 22px; opacity: 1; }
 .home-info .kicker { color: var(--glow); filter: brightness(1.5); }
-.info-ta { font-family: var(--ta-display) !important; font-weight: 600; font-size: 27px; line-height: 1.3; overflow-wrap: anywhere; }
+.info-ta { font-family: var(--ta-display) !important; font-weight: 600; font-size: 24px; line-height: 1.3; white-space: nowrap; }
 .info-en { font-size: 15px; color: rgba(251, 244, 228, .8); }
 .pill-btn {
   min-height: 50px; padding: 0 20px; flex: none; display: flex; align-items: center; gap: 8px;
@@ -408,7 +408,7 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
   flex: 1; min-width: 0; height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px;
   background: var(--ink); color: #2A1F12; font-size: 16px; font-weight: 600; cursor: pointer;
 }
-.r-btn { height: 48px; padding: 0 14px; flex: none; display: flex; align-items: center; gap: 6px; border-radius: 999px; font-size: 15px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.r-btn { height: 48px; padding: 0 14px; flex: 1; justify-content: center; display: flex; align-items: center; gap: 6px; border-radius: 999px; font-size: 15px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 .r-icon { width: 48px; height: 48px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: 50%; padding: 0; cursor: pointer; transition: transform .45s var(--spring); }
 .r-btn[aria-pressed="true"] { background: rgba(255, 255, 255, .32); }
 #r-save[aria-pressed="true"] { transform: scale(1.12); }

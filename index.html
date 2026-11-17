@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Thirukkural</title>
-<meta name="description" content="A visual Thirukkural reader. Three 3D sections, chapter cards, and a scrolling reader where you can tap any Tamil word for its meaning.">
+<meta name="description" content="A visual Thirukkural reader. Browse the books, read each kural as a card, and tap any Tamil word for its meaning.">
 <meta name="theme-color" content="#211508">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="assets/icons/icon-192.png" type="image/png">
@@ -24,14 +24,15 @@
   <!-- Home header -->
   <header class="home-head">
     <h1 lang="ta">திருக்குறள்</h1>
+    <p>Thirukkural</p>
   </header>
 
   <!-- Open-section header -->
   <div class="open-head">
-    <button type="button" class="glass round" id="close-section" aria-label="Back to all sections">
+    <button type="button" class="glass round" id="close-section" aria-label="Back to all books">
       <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
     </button>
-    <span class="glass chip" id="open-chip">Section II · Wealth</span>
+    <span class="glass chip" id="open-chip">Wealth</span>
   </div>
 
   <!-- 3D sections -->
@@ -59,7 +60,7 @@
       <span class="kicker" id="sec-kicker"></span>
       <h2 class="sec-ta" lang="ta" id="sec-ta"></h2>
     </div>
-    <div class="parts" id="parts" role="tablist" aria-label="Parts of this section"></div>
+    <div class="parts" id="parts" role="tablist" aria-label="Parts"></div>
     <div class="ch-scroll" id="ch-scroll">
       <div class="ch-grid" id="ch-grid" role="tabpanel"></div>
     </div>
@@ -119,7 +120,7 @@
     <div class="r-wash" aria-hidden="true"></div>
 
     <header class="r-head">
-      <button type="button" class="glass round" id="r-back" aria-label="Back to Section II, Wealth">
+      <button type="button" class="glass round" id="r-back" aria-label="Back to Wealth">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
       </button>
       <span class="r-title">
@@ -145,10 +146,6 @@
         <span class="r-count" id="r-count" aria-live="polite"></span>
       </div>
       <div class="r-buttons">
-        <button type="button" class="r-play" id="r-play" aria-label="Listen">
-          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path id="r-play-icon" d="M7 4.5v15l12-7.5z"/></svg>
-          <span id="r-play-label">Listen</span>
-        </button>
         <button type="button" class="r-btn glass" id="r-study" aria-pressed="false">
           <span aria-hidden="true" lang="ta" class="ta-glyph">அ</span> Word by word
         </button>
