@@ -200,10 +200,10 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .part[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: #2A1F12; }
 .ch-scroll {
   position: absolute; top: calc(266px + var(--to)); left: 0; right: 0; bottom: 0; overflow-y: auto; overscroll-behavior: contain;
-  padding: 12px 24px calc(124px + var(--bo)); scrollbar-width: none;
+  padding: 22px 24px calc(124px + var(--bo)); scrollbar-width: none;
   /* Cards fade out before they reach the tab bar */
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 14px, #000 calc(100% - 150px - var(--bo)), transparent calc(100% - 80px - var(--bo)));
-  mask-image: linear-gradient(180deg, transparent 0, #000 14px, #000 calc(100% - 150px - var(--bo)), transparent calc(100% - 80px - var(--bo)));
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 26px, #000 calc(100% - 150px - var(--bo)), transparent calc(100% - 80px - var(--bo)));
+  mask-image: linear-gradient(180deg, transparent 0, #000 26px, #000 calc(100% - 150px - var(--bo)), transparent calc(100% - 80px - var(--bo)));
 }
 .ch-scroll::-webkit-scrollbar { display: none; }
 .ch-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
