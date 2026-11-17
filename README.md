@@ -12,7 +12,7 @@ A visual reader for all 1,330 kurals of the Thirukkural. Three sections appear a
 
 - All 133 chapters and 1,330 kurals across three books (Virtue, Wealth, Love), loaded one chapter at a time
 - Each kural is a card. Swipe sideways (or use arrow keys) between kurals; the end of a chapter returns you to its book
-- Each card shows the kural in Tamil, how to say it, and what it means in English
+- Each card shows the kural in Tamil, how to say it, and its meaning in English
 - Tap a word for its pronunciation and meaning, or turn on word by word study mode
 - Search by describing a situation, like "a friend let me down", to find kurals that speak to it
 - Saved kurals have their own screen
