@@ -257,22 +257,24 @@
   });
   window.addEventListener('pointerup', () => { if (state.pressed) { state.pressed = false; tilt(); } });
 
-  // Opening a book: it comes forward and its cover swings open, the screen fills with the
-  // book's colour, then the chapters appear with the book tucked into the corner.
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function openSection() {
-    if (state.open || state.opening) return;
-    state.pressed = false;
-    const finish = () => {
-      state.opening = false; state.open = true; layout();
-      showCurrentCard();
-      setTimeout(() => { const c = $('.ch-card.cur') || $('.ch-card'); if (c) c.focus({ preventScroll: true }); }, 500);
-    };
-    if (reduceMotion) { finish(); return; }
-    state.opening = true; layout();
-    setTimeout(finish, 720);
+  // Opening a book is one motion: the book flies to its miniature spot while its cover
+  // peeks open and closes, and the chapters rise in as it goes.
+  function peekCover() {
+    const c = books[state.focus].querySelector('.cover');
+    c.classList.remove('peek'); void c.offsetWidth; c.classList.add('peek');
+    setTimeout(() => c.classList.remove('peek'), 600);
   }
-  function closeSection() { state.open = false; state.tx = 0; state.ty = 0; layout(); books[state.focus].focus({ preventScroll: true }); }
+  function openSection() {
+    if (state.open) return;
+    state.pressed = false; state.open = true;
+    peekCover();
+    layout();
+    showCurrentCard();
+    setTimeout(() => { const c = $('.ch-card.cur') || $('.ch-card'); if (c) c.focus({ preventScroll: true }); }, 500);
+  }
+  function closeSection() {
+    phone.classList.add('leaving'); setTimeout(() => phone.classList.remove('leaving'), 600);
+    state.open = false; state.tx = 0; state.ty = 0; peekCover(); layout(); books[state.focus].focus({ preventScroll: true }); }
   $('#open-section').addEventListener('click', openSection);
   $('#close-section').addEventListener('click', closeSection);
 
@@ -306,7 +308,7 @@
       const read = chapterRead(c), total = c.end - c.start + 1;
       const pos = 'object-position:' + ((c.n * 13) % 100) + '% 50%';
       const status = read === total ? 'all ' + total + ' read' : read > 0 ? read + ' of ' + total + ' read' : total + ' kurals';
-      return '<div class="ch-wrap" style="--d:' + (0.08 + Math.min(j, 8) * 0.04).toFixed(2) + 's">' +
+      return '<div class="ch-wrap" style="--d:' + (0.06 + Math.min(j, 8) * 0.035).toFixed(3) + 's">' +
         '<button type="button" class="ch-card' + (last === c.n ? ' cur' : '') + '" data-n="' + c.n + '" aria-label="Chapter ' + c.n + ', ' + esc(c.en) + ', ' + status + '">' +
           '<img src="' + art(c.n) + '" alt="" loading="lazy" style="' + pos + '">' +
           '<img class="soft" src="' + art(c.n) + '" alt="" aria-hidden="true" loading="lazy" style="' + pos + '">' +
