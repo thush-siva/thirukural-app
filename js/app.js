@@ -175,11 +175,17 @@
     root.style.setProperty('--card-rgb', s.cardRgb);
     document.querySelector('meta[name="theme-color"]').setAttribute('content', s.deep);
     phone.classList.toggle('is-open', open);
+    const opening = !!state.opening;
+    phone.classList.toggle('opening', opening);
 
     books.forEach((b, i) => {
       const off = i - focus, isF = off === 0;
       let pos;
-      if (!open) {
+      if (opening) {
+        // The chosen book comes toward you and opens; the others fall away
+        pos = isF ? 'translate3d(0px,40px,170px) rotateX(0deg) rotateY(0deg) scale(1.35)'
+          : 'translate3d(' + off * 430 + 'px,-110px,-200px) rotateX(0deg) rotateY(' + (-off * 70) + 'deg) scale(0.6)';
+      } else if (!open) {
         pos = isF ? 'translate3d(0px,0px,0px) rotateX(0deg) rotateY(0deg) scale(1)'
           : 'translate3d(' + off * 176 + 'px,8px,-170px) rotateX(0deg) rotateY(' + (-off * 34) + 'deg) scale(0.84)';
       } else {
@@ -187,21 +193,21 @@
           : 'translate3d(' + off * 430 + 'px,-110px,-200px) rotateX(0deg) rotateY(' + (-off * 70) + 'deg) scale(0.6)';
       }
       b.querySelector('.pos').style.transform = pos;
-      b.style.opacity = open && !isF ? 0 : (isF ? 1 : 0.7);
+      b.style.opacity = (open || opening) && !isF ? 0 : (isF ? 1 : 0.7);
       b.style.zIndex = isF ? 3 : 1;
       b.style.pointerEvents = open && !isF ? 'none' : 'auto';
       b.tabIndex = open ? -1 : 0;
       b.classList.toggle('focused', isF);
       const cover = b.querySelector('.cover');
-      cover.style.transitionDelay = open ? '.12s' : '0s';
-      cover.style.transform = 'translateZ(15.5px) rotateY(0deg)';
+      cover.style.transitionDelay = opening ? '.1s' : '0s';
+      cover.style.transform = 'translateZ(15.5px) rotateY(' + (opening && isF ? -160 : 0) + 'deg)';
       const sec = SECTIONS[i];
       b.setAttribute('aria-label', open ? sec.en + ', open' : (isF ? 'Open ' + sec.en : 'Show ' + sec.en));
     });
     shadows.forEach((sh, i) => {
       const off = i - focus, isF = off === 0;
-      sh.style.transform = open ? 'translateX(0px) scale(0.5)' : 'translateX(' + off * 176 + 'px) scale(' + (isF ? 1 : 0.72) + ')';
-      sh.style.opacity = open ? 0 : (isF ? 0.6 : 0.25);
+      sh.style.transform = open || opening ? 'translateX(0px) scale(0.5)' : 'translateX(' + off * 176 + 'px) scale(' + (isF ? 1 : 0.72) + ')';
+      sh.style.opacity = open || opening ? 0 : (isF ? 0.6 : 0.25);
     });
     dotEls.forEach((d, i) => d.classList.toggle('on', i === focus));
 
@@ -250,10 +256,20 @@
   });
   window.addEventListener('pointerup', () => { if (state.pressed) { state.pressed = false; tilt(); } });
 
+  // Opening a book: it comes forward and its cover swings open, the screen fills with the
+  // book's colour, then the chapters appear with the book tucked into the corner.
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function openSection() {
-    state.open = true; state.pressed = false; layout();
-    showCurrentCard();
-    setTimeout(() => { const c = $('.ch-card.cur') || $('.ch-card'); if (c) c.focus({ preventScroll: true }); }, 500);
+    if (state.open || state.opening) return;
+    state.pressed = false;
+    const finish = () => {
+      state.opening = false; state.open = true; layout();
+      showCurrentCard();
+      setTimeout(() => { const c = $('.ch-card.cur') || $('.ch-card'); if (c) c.focus({ preventScroll: true }); }, 500);
+    };
+    if (reduceMotion) { finish(); return; }
+    state.opening = true; layout();
+    setTimeout(finish, 720);
   }
   function closeSection() { state.open = false; state.tx = 0; state.ty = 0; layout(); books[state.focus].focus({ preventScroll: true }); }
   $('#open-section').addEventListener('click', openSection);

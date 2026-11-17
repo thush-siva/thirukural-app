@@ -87,6 +87,11 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .home-head p { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: .01em; color: var(--ink-2); }
 .open-head { position: absolute; top: calc(54px + var(--to)); left: 16px; right: 16px; display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: opacity .35s ease; }
 .is-open .home-head, .is-open .home-info { opacity: 0; pointer-events: none; }
+.opening .home-head, .opening .home-info { opacity: 0; pointer-events: none; }
+.opening .book .glare { opacity: 0; }
+/* Fills the screen with the book's colour at the end of the opening, then lifts to show the chapters */
+.veil { position: absolute; inset: 0; z-index: 3; background: var(--deep); opacity: 0; pointer-events: none; transition: opacity .45s ease; }
+.opening .veil { opacity: 1; transition: opacity .32s ease .4s; }
 .is-open .open-head { opacity: 1; pointer-events: auto; }
 
 /* Stage and books */
