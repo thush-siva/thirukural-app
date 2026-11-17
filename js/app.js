@@ -436,7 +436,7 @@
     $('#r-end-ta').textContent = ch.ta;
     $('#r-end-en').textContent = backTo ? 'Returning to ' + backTo : 'Returning to ' + s.en;
     deck.innerHTML = ch.kurals.map((k, i) =>
-      '<article class="kcard' + (k.u ? '' : ' no-more') + '" data-i="' + i + '" aria-label="Kural ' + k.n + '">' +
+      '<article class="kcard' + (k.m ? '' : ' no-more') + '" data-i="' + i + '" aria-label="Kural ' + k.n + '">' +
         '<div class="k-scroll">' +
           '<div class="k-img"><img src="' + art(ch.num) + '" alt="" draggable="false" style="object-position:' + ((i * 11) % 100) + '% 40%"></div>' +
           '<div class="k-body">' +
@@ -448,19 +448,22 @@
               ).join('') + '</div>').join('') +
             '</div>' +
             '<p class="translit">' + esc(k.tr) + '</p>' +
-            '<p class="meaning">' + esc(k.m) + '</p>' +
           '</div>' +
-          (k.u ? '<section class="k-more" aria-label="What it means">' +
+          (k.m ? '<section class="k-more" aria-label="What it means">' +
             '<div class="k-rule" aria-hidden="true"></div>' +
             '<h3>What it means <span lang="ta">பொருள்</span></h3>' +
-            '<p class="k-explain" lang="ta">' + esc(k.u) + '</p>' +
-            '<span class="k-credit">Commentary by Mu. Varadarasanar (<span lang="ta">மு. வரதராசனார்</span>)</span>' +
+            '<p class="k-explain">' + esc(k.m) + '</p>' +
           '</section>' : '') +
         '</div>' +
         '<button type="button" class="k-grab" aria-label="Back to card"><span></span></button>' +
-        '<div class="k-hint" aria-hidden="true"><span>What it means <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div>' +
+        '<div class="k-hint" aria-hidden="true"><span>More <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></div>' +
       '</article>').join('');
     cards = [...deck.children];
+    // Only show the scroll hint on cards whose meaning runs past the bottom
+    requestAnimationFrame(() => cards.forEach((c) => {
+      const sc = c.querySelector('.k-scroll');
+      c.classList.toggle('no-more', sc.scrollHeight - sc.clientHeight < 24);
+    }));
     cards.forEach((c) => {
       const sc = c.querySelector('.k-scroll');
       sc.addEventListener('scroll', () => onCardScroll(c, sc), { passive: true });
