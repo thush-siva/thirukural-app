@@ -257,24 +257,17 @@
   });
   window.addEventListener('pointerup', () => { if (state.pressed) { state.pressed = false; tilt(); } });
 
-  // Opening a book is one motion: the book flies to its miniature spot while its cover
-  // peeks open and closes, and the chapters rise in as it goes.
-  function peekCover() {
-    const c = books[state.focus].querySelector('.cover');
-    c.classList.remove('peek'); void c.offsetWidth; c.classList.add('peek');
-    setTimeout(() => c.classList.remove('peek'), 600);
-  }
+  // Opening a book is a short, plain transition: the book moves to its miniature spot and the chapters fade in.
   function openSection() {
     if (state.open) return;
     state.pressed = false; state.open = true;
-    peekCover();
     layout();
     showCurrentCard();
-    setTimeout(() => { const c = $('.ch-card.cur') || $('.ch-card'); if (c) c.focus({ preventScroll: true }); }, 500);
+    setTimeout(() => { const c = $('.ch-card.cur') || $('.ch-card'); if (c) c.focus({ preventScroll: true }); }, 350);
   }
   function closeSection() {
-    phone.classList.add('leaving'); setTimeout(() => phone.classList.remove('leaving'), 600);
-    state.open = false; state.tx = 0; state.ty = 0; peekCover(); layout(); books[state.focus].focus({ preventScroll: true }); }
+    phone.classList.add('leaving'); setTimeout(() => phone.classList.remove('leaving'), 350);
+    state.open = false; state.tx = 0; state.ty = 0; layout(); books[state.focus].focus({ preventScroll: true }); }
   $('#open-section').addEventListener('click', openSection);
   $('#close-section').addEventListener('click', closeSection);
 
