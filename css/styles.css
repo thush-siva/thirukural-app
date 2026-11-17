@@ -329,6 +329,13 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .reader.out { opacity: 0; transform: scale(.86) translateY(-30px); transition: opacity .38s ease-in, transform .38s ease-in, visibility 0s linear .38s; }
 .r-wash { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 75% at 50% 32%, rgba(var(--card-rgb), .5) 0%, rgba(var(--card-rgb), .16) 45%, rgba(var(--card-rgb), 0) 75%); }
 
+/* When a card is full screen, its text fades out under the header instead of running behind the buttons */
+.r-headfade {
+  position: absolute; left: 0; right: 0; top: 0; height: calc(150px + var(--to)); z-index: 75; pointer-events: none;
+  background: linear-gradient(180deg, var(--card) 0%, var(--card) 58%, rgba(var(--card-rgb), 0) 100%);
+  opacity: 0; transition: opacity .3s ease;
+}
+.reader.expanded.past-top .r-headfade { opacity: 1; }
 .r-head { position: absolute; top: calc(52px + var(--to)); left: 16px; right: 16px; z-index: 80; display: flex; align-items: center; gap: 12px; pointer-events: none; }
 .r-head .round { pointer-events: auto; flex: none; }
 .r-title { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center; }
@@ -360,6 +367,8 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .k-body .kicker { color: #FCE3B4; letter-spacing: .16em; }
 .k-more { display: flex; flex-direction: column; gap: 10px; padding: 8px 24px 40px; }
 .kcard.big .k-more { padding-bottom: calc(60px + var(--bo)); }
+/* Room to keep scrolling when expanded, so short kurals can still move under the header */
+.kcard.big .k-scroll::after { content: ""; display: block; height: 40%; }
 .k-rule { height: 1px; margin-bottom: 12px; background: rgba(251, 244, 228, .18); }
 .k-more h3 { margin: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #FCE3B4; }
 .k-more h3 span { font-size: 14px; letter-spacing: 0; text-transform: none; color: rgba(251, 244, 228, .7); }

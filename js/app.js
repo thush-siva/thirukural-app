@@ -483,13 +483,17 @@
     if (!c.classList.contains('top')) return;
     const st = sc.scrollTop;
     c.classList.toggle('scrolled', st > 24);
+    reader.classList.toggle('past-top', st > 60);
     if (!R.big && st > 8) setBig(true);
-    else if (R.big && st <= 0) setBig(false);
+    // Ignore the jump to the top that the resize itself can cause right after expanding
+    else if (R.big && st <= 0 && performance.now() - R.bigAt > 450) setBig(false);
   }
 
   function setBig(on) {
     R.big = on;
+    if (on) R.bigAt = performance.now();
     reader.classList.toggle('expanded', on);
+    if (!on) reader.classList.remove('past-top');
     const c = cards[R.idx];
     if (c) c.classList.toggle('big', on);
     if (on) closeSheet();
