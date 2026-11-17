@@ -352,7 +352,17 @@
   const R = { from: 'home', prevOpen: false, open: false, ch: null, idx: 0, sel: null, study: false, playing: false, big: false, dx: 0, lock: false };
   const chapterCache = new Map();
   let cards = [];
-  onFit = () => { if (R.open) layoutDeck(); };
+  onFit = () => { if (R.open) { layoutDeck(); fitCards(); } };
+  // On shorter screens the artwork gives up height so the kural and its translation always fit on the card
+  function fitCards() {
+    cards.forEach((c) => {
+      const img = c.querySelector('.k-img'), sc = c.querySelector('.k-scroll');
+      img.style.transition = 'none'; img.style.height = '';
+      const over = sc.scrollHeight - sc.clientHeight;
+      if (over > 0) img.style.height = Math.max(64, 170 - over - 8) + 'px';
+      void img.offsetHeight; img.style.transition = '';
+    });
+  }
 
   const darken = (hex, d) => {
     const n = parseInt(hex.slice(1, 7), 16), f = (v) => Math.round(v * (1 - d));
@@ -454,6 +464,7 @@
         '<button type="button" class="k-grab" aria-label="Back to card"><span></span></button>' +
       '</article>').join('');
     cards = [...deck.children];
+    requestAnimationFrame(fitCards);
     cards.forEach((c) => {
       const sc = c.querySelector('.k-scroll');
       sc.addEventListener('scroll', () => onCardScroll(c, sc), { passive: true });
