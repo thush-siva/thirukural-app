@@ -846,6 +846,10 @@
   window.addEventListener('hashchange', () => { if (!R.open) openFromHash(); });
   start();
 
+  // Temporary: surface script errors on screen while testing on phones
+  window.addEventListener('error', (e) => toast('Error: ' + (e.message || 'unknown') + (e.lineno ? ' (line ' + e.lineno + ')' : '')));
+  window.addEventListener('unhandledrejection', (e) => toast('Error: ' + ((e.reason && e.reason.message) || e.reason)));
+
   if ('serviceWorker' in navigator && location.protocol === 'https:') {
     navigator.serviceWorker.register('sw.js').catch(() => { /* offline support unavailable */ });
   }
