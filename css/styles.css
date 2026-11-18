@@ -214,12 +214,7 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
   filter: contrast(1.05); transform: scale(1.06); transition: filter .4s ease, transform .4s var(--spring);
 }
 /* Sharp image on top, blurred only behind the text at the bottom */
-.ch-card img.soft {
-  filter: blur(10px) contrast(1.05);
-  -webkit-mask-image: linear-gradient(180deg, transparent 38%, #000 62%); mask-image: linear-gradient(180deg, transparent 38%, #000 62%);
-}
 .ch-card:hover img { transform: scale(1); }
-.ch-card:hover img.soft { filter: blur(8px) contrast(1.05); }
 .ch-card .scrim {
   position: absolute; inset: 0;
   background: linear-gradient(180deg, rgba(var(--card-rgb), .3) 0%, rgba(var(--card-rgb), 0) 30%, rgba(var(--card-rgb), 0) 40%, rgba(var(--card-rgb), .55) 66%, rgba(var(--card-rgb), .92) 100%);
@@ -473,3 +468,6 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: .01s !important; transition-delay: 0s !important; }
 }
+
+/* While the reader covers the screen, stop drawing the 3D books, blurs and glass behind it */
+.reading .glow, .reading .stage, .reading .home-head, .reading .home-info, .reading .open-head, .reading .chapters, .reading .tabbar, .reading .panel { visibility: hidden; }

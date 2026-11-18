@@ -303,7 +303,6 @@
       return '<div class="ch-wrap" style="--d:' + (0.06 + Math.min(j, 8) * 0.035).toFixed(3) + 's">' +
         '<button type="button" class="ch-card' + (last === c.n ? ' cur' : '') + '" data-n="' + c.n + '" aria-label="Chapter ' + c.n + ', ' + esc(c.en) + ', ' + status + '">' +
           '<img src="' + art(c.n) + '" alt="" loading="lazy" style="' + pos + '">' +
-          '<img class="soft" src="' + art(c.n) + '" alt="" aria-hidden="true" loading="lazy" style="' + pos + '">' +
           '<span class="scrim" aria-hidden="true"></span>' +
           '<span class="ch-top"><span class="ch-n">' + c.n + '</span>' + (last === c.n ? '<span class="ch-pill">Reading</span>' : '') + '</span>' +
           '<span class="ch-bottom"><span class="ch-ta" lang="ta">' + esc(c.ta) + '</span><span class="ch-en">' + esc(c.en) + '</span>' +
@@ -352,7 +351,8 @@
   const R = { from: 'home', prevOpen: false, open: false, ch: null, idx: 0, sel: null, study: false, playing: false, big: false, dx: 0, lock: false };
   const chapterCache = new Map();
   let cards = [];
-  onFit = () => { if (R.open) { layoutDeck(); fitCards(); } };
+  let fitT = 0;
+  onFit = () => { if (R.open) { layoutDeck(); clearTimeout(fitT); fitT = setTimeout(fitCards, 150); } };
   // On shorter screens the artwork gives up height so the kural and its translation always fit on the card
   function fitCards() {
     cards.forEach((c) => {
@@ -405,6 +405,7 @@
     reader.setAttribute('aria-hidden', 'false');
     R.open = true;
     requestAnimationFrame(() => reader.classList.add('in'));
+    clearTimeout(R.coverT); R.coverT = setTimeout(() => { if (R.open) phone.classList.add('reading'); }, 500);
     setTimeout(() => $('#r-back').focus({ preventScroll: true }), 300);
   }
 
@@ -414,6 +415,7 @@
     closeSheet();
     setBig(false);
     if (finished) reader.classList.add('out');
+    clearTimeout(R.coverT); phone.classList.remove('reading');
     reader.classList.remove('in');
     reader.setAttribute('aria-hidden', 'true');
     if (location.hash) history.replaceState(null, '', location.pathname + location.search);
@@ -562,10 +564,12 @@
   let drag = null, suppressClick = false;
   deck.addEventListener('pointerdown', (e) => {
     if ((e.button !== undefined && e.button !== 0) || R.big || R.idx >= R.ch.kurals.length) return;
-    drag = { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId, cap: false };
+    drag = { x: e.clientX, y: e.clientY, lx: e.clientX, t: performance.now(), id: e.pointerId, cap: false };
   });
   deck.addEventListener('pointermove', (e) => {
     if (!drag) return;
+    if (e.pointerId !== drag.id) return;
+    drag.lx = e.clientX;
     const dx = (e.clientX - drag.x) / scale, dy = (e.clientY - drag.y) / scale;
     if (!drag.cap) {
       if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy)) { if (Math.abs(dy) > 10) drag = null; return; }
@@ -583,7 +587,9 @@
     suppressClick = true;
     setTimeout(() => { suppressClick = false; }, 0);
     deck.classList.remove('dragging');
-    const dx = (e.clientX - g.x) / scale;
+    try { deck.releasePointerCapture(g.id); } catch (err) { /* ignore */ }
+    // A cancelled touch can report 0,0, so judge the swipe by where the finger last was
+    const dx = (g.lx - g.x) / scale;
     const v = dx / Math.max(1, performance.now() - g.t);
     R.dx = 0;
     let i = R.idx;
